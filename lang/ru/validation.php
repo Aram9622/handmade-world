@@ -15,6 +15,6 @@ return [
     'attributes' => [
         'name' => 'Имя', 'email' => 'Почта', 'password' => 'Пароль', 'title' => 'Название',
         'category' => 'Категория', 'description' => 'Описание', 'price' => 'Цена',
-        'contact_email' => 'Почта для покупателей', 'photo' => 'Фотография',
+        'discount_percent' => 'Скидка', 'contact_email' => 'Почта для покупателей', 'photo' => 'Фотография',
     ],
 ];

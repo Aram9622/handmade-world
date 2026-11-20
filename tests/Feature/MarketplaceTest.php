@@ -103,4 +103,40 @@ class MarketplaceTest extends TestCase
         $disk->assertExists($listing->refresh()->photo_path);
         $this->get(route('listings.photo', $listing))->assertOk()->assertHeader('Content-Type', 'image/webp');
     }
+
+    public function test_discounts_affect_catalog_prices_and_shared_listing_details(): void
+    {
+        $owner = User::factory()->create();
+        $data = [
+            'title' => 'Чашка & блюдце',
+            'category' => 'ceramics',
+            'price' => 1001,
+            'description' => 'Керамика ручной работы.',
+            'contact_email' => 'maker@example.com',
+        ];
+        $listing = Listing::create([...$data, 'user_id' => $owner->id, 'photo_path' => 'listings/cup.webp']);
+        Listing::create([...$data, 'title' => 'Блюдо без скидки', 'price' => 900, 'user_id' => $owner->id, 'photo_path' => 'listings/plate.webp']);
+        $update = route('listings.update', $listing);
+        $url = route('listings.show', $listing);
+
+        $this->actingAs($owner)->put($update, [...$data, 'discount_percent' => 100])
+            ->assertSessionHasErrors('discount_percent');
+        $this->assertSame(0, $listing->refresh()->discount_percent);
+
+        $this->put($update, [...$data, 'discount_percent' => 25])->assertRedirect($url);
+        $this->assertSame(25, $listing->refresh()->discount_percent);
+        $this->get('/?sort=low')->assertSeeInOrder(['Чашка & блюдце', '750,75 ₽', 'Блюдо без скидки']);
+        $this->get('/?sort=high')->assertSeeInOrder(['Блюдо без скидки', 'Чашка & блюдце']);
+
+        $this->post(route('logout'));
+        $this->get($url)->assertOk()
+            ->assertSee('property="og:url" content="'.$url.'"', false)
+            ->assertSee('property="og:image" content="'.route('listings.photo', $listing).'"', false)
+            ->assertSee('750,75 ₽')
+            ->assertSee('https://t.me/share/url?url='.rawurlencode($url))
+            ->assertSee('https://vk.com/share.php?url='.rawurlencode($url));
+
+        $this->actingAs($owner)->put($update, [...$data, 'discount_percent' => ''])->assertRedirect($url);
+        $this->assertSame(0, $listing->refresh()->discount_percent);
+    }
 }

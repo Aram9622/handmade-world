@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Каталог изделий ручной работы от независимых мастеров.">
+    @stack('metadata')
     <title>@yield('title', 'Handmade Work — изделия ручной работы')</title>
     <link rel="stylesheet" href="{{ asset('market.css') }}">
 </head>

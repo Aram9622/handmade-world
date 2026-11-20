@@ -46,7 +46,8 @@ class ListingController extends Controller
             $query->where('category', $category);
         }
         if ($sort !== 'new') {
-            $query->orderBy('price', $sort === 'low' ? 'asc' : 'desc');
+            $direction = $sort === 'low' ? 'asc' : 'desc';
+            $query->orderByRaw('price * (100 - discount_percent) '.$direction);
         }
 
         $listings = $query->latest('id')->paginate(12)->withQueryString();
