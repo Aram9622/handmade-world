@@ -50,9 +50,10 @@ class ListingController extends Controller
             $query->orderByRaw('price * (100 - discount_percent) '.$direction);
         }
 
-        $listings = $query->latest('id')->paginate(12)->withQueryString();
+        $listings = $query->latest('created_at')->latest('id')->paginate(12)->withQueryString();
+        $showFeed = $search === '' && $category === '' && $sort === 'new';
 
-        return view('catalog', compact('listings', 'search', 'category', 'sort'));
+        return view('catalog', compact('listings', 'search', 'category', 'sort', 'showFeed'));
     }
 
     public function show(Listing $listing)

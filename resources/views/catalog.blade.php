@@ -5,7 +5,7 @@
     <div class="hero-copy">
         <h1>Сделано <em>руками.</em></h1>
         <p>Открывайте изделия независимых мастеров или выставляйте на продажу то, что создали сами.</p>
-        <a class="button" href="#catalog">Смотреть каталог</a>
+        <a class="button" href="{{ route('catalog') }}#catalog-results">Смотреть новинки</a>
     </div>
     <div class="hero-photo" role="img" aria-label="Керамические изделия в мастерской"></div>
 </section>
@@ -32,14 +32,23 @@
         <button class="button" type="submit">Найти</button>
     </form>
     @include('errors')
+    <div id="catalog-results">
+        <h3 class="results-heading">{{ $showFeed ? 'Новые изделия' : 'Результаты поиска' }}</h3>
+    </div>
     <div class="grid">
         @forelse($listings as $listing)
             <article class="card">
                 <a href="{{ route('listings.show', $listing) }}">
                     <img src="{{ route('listings.photo', $listing) }}" alt="{{ $listing->title }}" loading="lazy">
-                    <div class="card-copy"><span>{{ \App\Models\Listing::CATEGORIES[$listing->category] }}</span><h3>{{ $listing->title }}</h3><strong>@include('listing-price')</strong>
+                    <div class="card-copy">
+                        <span>{{ \App\Models\Listing::CATEGORIES[$listing->category] }}</span>
+                        <h4>{{ $listing->title }}</h4>
+                        <strong>@include('listing-price')</strong>
                         @if($listing->city)
                             <p class="contact">{{ $listing->city }}</p>
+                        @endif
+                        @if($showFeed && $listing->created_at)
+                            <time class="published-date" datetime="{{ $listing->created_at->toAtomString() }}">{{ $listing->created_at->locale('ru')->translatedFormat('j F Y') }}</time>
                         @endif
                     </div>
                 </a>
@@ -56,6 +65,6 @@
             </div>
         @endforelse
     </div>
-    @include('listing-pagination', ['anchor' => '#catalog'])
+    @include('listing-pagination', ['anchor' => '#catalog-results'])
 </section>
 @endsection

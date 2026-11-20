@@ -168,4 +168,26 @@ class MarketplaceTest extends TestCase
         $this->put($update, [...$data, 'city' => '', 'fulfillment_method' => 'delivery'])->assertRedirect($url);
         $this->assertDatabaseHas('listings', ['id' => $listing->id, 'city' => null, 'fulfillment_method' => 'delivery']);
     }
+
+    public function test_homepage_feed_uses_publication_date(): void
+    {
+        $details = [
+            'user_id' => User::factory()->create()->id,
+            'category' => 'ceramics',
+            'price' => 1200,
+            'description' => 'Ручная работа.',
+            'contact_email' => 'maker@example.com',
+            'photo_path' => 'listings/cup.webp',
+        ];
+        $this->travelTo(\Illuminate\Support\Carbon::parse('2026-11-21 09:00:00'));
+        Listing::create([...$details, 'title' => 'Новое изделие']);
+        $this->travelTo(\Illuminate\Support\Carbon::parse('2026-11-20 09:00:00'));
+        Listing::create([...$details, 'title' => 'Раннее изделие']);
+
+        $this->get('/')->assertOk()
+            ->assertSeeInOrder(['Новые изделия', 'Новое изделие', 'Раннее изделие'])
+            ->assertSee('21 ноября 2026');
+        $this->get('/?category=ceramics')->assertOk()
+            ->assertSee('Результаты поиска')->assertDontSee('Новые изделия');
+    }
 }
