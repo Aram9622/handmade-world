@@ -20,7 +20,7 @@ class Listing extends Model
         'both' => 'Самовывоз и доставка',
     ];
 
-    protected $fillable = ['user_id', 'title', 'category', 'description', 'price', 'discount_percent', 'city', 'fulfillment_method', 'contact_email', 'photo_path'];
+    protected $fillable = ['user_id', 'title', 'category', 'description', 'price', 'discount_percent', 'city', 'fulfillment_method', 'contact_email', 'contact_phone', 'photo_path'];
 
     protected $attributes = ['discount_percent' => 0];
 

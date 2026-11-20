@@ -42,6 +42,10 @@
             </select>
         </label>
         <label>Почта для покупателей <small>Адрес будет виден в объявлении.</small><input type="email" name="contact_email" maxlength="254" value="{{ old('contact_email', $listing?->contact_email) }}" required></label>
+        <label>Телефон для покупателей
+            <small>Необязательно. Номер с кодом страны будет виден всем в объявлении.</small>
+            <input type="tel" name="contact_phone" autocomplete="tel" maxlength="30" placeholder="+7 900 123-45-67" value="{{ old('contact_phone', $listing?->contact_phone) }}">
+        </label>
         <button class="button" type="submit">{{ $listing ? 'Сохранить изменения' : 'Опубликовать объявление' }}</button>
     </form>
 </section>
