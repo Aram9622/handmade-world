@@ -8,6 +8,8 @@
         default => $categoryName.' ручной работы',
     };
     $page = $listings->currentPage();
+    $editorial = config('category_editorial');
+    $showEditorial = $search === '' && $sort === 'new' && $page === 1;
     $canonicalParameters = array_filter(['category' => $category, 'page' => $page > 1 ? $page : null]);
 @endphp
 @section('title', $catalogTitle.($page > 1 ? ' — страница '.$page : '').' | Handmade Work')
@@ -22,17 +24,18 @@
 @endpush
 
 @section('content')
-<section class="hero">
-    <div class="hero-copy">
-        <h1>Сделано <em>руками.</em></h1>
-        <p>Открывайте изделия независимых мастеров или выставляйте на продажу то, что создали сами.</p>
-        <a class="button" href="{{ route('catalog') }}#catalog-results">Смотреть новинки</a>
-    </div>
-    <div class="hero-photo" role="img" aria-label="Керамические изделия в мастерской"></div>
-</section>
+@if($showEditorial && $categoryName)
+    @include('category-editorial', ['story' => $editorial[$category]])
+@elseif($showEditorial)
+    @include('catalog-editorial')
+@endif
 
 <section id="catalog" class="catalog">
-    <h2>{{ $categoryName ?? 'Каталог изделий' }}</h2>
+    @if(!$showEditorial)
+        <h1 class="catalog-title">{{ $categoryName ?? 'Каталог изделий' }}</h1>
+    @else
+        <h2>{{ $categoryName ? 'Объявления мастеров' : 'Каталог изделий' }}</h2>
+    @endif
     <form class="filters" action="{{ route('catalog') }}#catalog" method="get">
         <label>Поиск<input name="q" value="{{ $search }}" placeholder="Например, керамическая чашка" maxlength="100"></label>
         <label>Категория
@@ -76,7 +79,10 @@
             </article>
         @empty
             <div class="empty">
-                @if($search || $category)
+                @if($category && $search === '')
+                    <p>В этом разделе пока нет объявлений.</p>
+                    <a class="button outline" href="{{ route('catalog') }}#catalog">Смотреть весь каталог</a>
+                @elseif($search)
                     <p>По этим фильтрам ничего не найдено.</p>
                     <a class="button outline" href="{{ route('catalog') }}#catalog">Сбросить фильтры</a>
                 @else

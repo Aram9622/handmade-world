@@ -217,4 +217,26 @@ class MarketplaceTest extends TestCase
         $this->actingAs($owner)->put($update, [...$data, 'contact_phone' => ''])->assertRedirect($url);
         $this->assertNull($listing->refresh()->contact_phone);
     }
+
+    public function test_categories_have_distinct_editorials_and_filter_their_listings(): void
+    {
+        $data = [
+            'user_id' => User::factory()->create()->id,
+            'price' => 1500,
+            'description' => 'Ручная работа.',
+            'contact_email' => 'maker@example.com',
+            'photo_path' => 'listings/example.webp',
+        ];
+        Listing::create([...$data, 'title' => 'Пейзаж маслом', 'category' => 'paintings']);
+        Listing::create([...$data, 'title' => 'Чашка из глины', 'category' => 'ceramics']);
+
+        $this->get('/')->assertOk()->assertSee('Ремёсла и искусство')->assertSee('?category=paintings');
+        $this->get('/?category=paintings')->assertOk()
+            ->assertSeeInOrder(['Микеланджело', 'Ван Гог', 'По мотивам известных работ', 'Объявления мастеров', 'Пейзаж маслом'])
+            ->assertDontSee('Чашка из глины');
+        $this->get('/?category=ceramics')->assertOk()
+            ->assertSee('Земля, вода и огонь')->assertSee('Чашка из глины')->assertDontSee('Пейзаж маслом');
+        $this->get('/?category=paintings&q=Пейзаж')->assertOk()
+            ->assertSee('Пейзаж маслом')->assertDontSee('История раздела');
+    }
 }
