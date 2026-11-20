@@ -1,5 +1,26 @@
 @extends('layout')
 
+@php
+    $categoryName = \App\Models\Listing::CATEGORIES[$category] ?? null;
+    $catalogTitle = match ($category) {
+        '' => 'Изделия ручной работы',
+        'other' => 'Другие изделия ручной работы',
+        default => $categoryName.' ручной работы',
+    };
+    $page = $listings->currentPage();
+    $canonicalParameters = array_filter(['category' => $category, 'page' => $page > 1 ? $page : null]);
+@endphp
+@section('title', $catalogTitle.($page > 1 ? ' — страница '.$page : '').' | Handmade Work')
+@section('description', $catalogTitle.' от независимых мастеров. Смотрите фотографии, сравнивайте цены и связывайтесь с продавцами напрямую.')
+
+@push('metadata')
+    @if($search !== '' || $sort !== 'new' || ($page > 1 && $listings->isEmpty()))
+        <meta name="robots" content="noindex, follow">
+    @else
+        <link rel="canonical" href="{{ route('catalog', $canonicalParameters) }}">
+    @endif
+@endpush
+
 @section('content')
 <section class="hero">
     <div class="hero-copy">
@@ -11,7 +32,7 @@
 </section>
 
 <section id="catalog" class="catalog">
-    <h2>Каталог изделий</h2>
+    <h2>{{ $categoryName ?? 'Каталог изделий' }}</h2>
     <form class="filters" action="{{ route('catalog') }}#catalog" method="get">
         <label>Поиск<input name="q" value="{{ $search }}" placeholder="Например, керамическая чашка" maxlength="100"></label>
         <label>Категория

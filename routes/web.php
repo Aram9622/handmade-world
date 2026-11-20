@@ -2,7 +2,11 @@
 
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ListingController;
+use App\Http\Controllers\SearchIndexController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/robots.txt', [SearchIndexController::class, 'robots'])->name('robots');
+Route::get('/sitemap.xml', [SearchIndexController::class, 'sitemap'])->name('sitemap');
 
 Route::get('/', [ListingController::class, 'index'])->name('catalog');
 Route::get('/items/{listing}/photo', [ListingController::class, 'photo'])->name('listings.photo');

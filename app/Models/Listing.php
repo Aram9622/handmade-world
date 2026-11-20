@@ -26,9 +26,14 @@ class Listing extends Model
 
     protected $casts = ['discount_percent' => 'integer'];
 
+    public function salePriceInKopecks(): int
+    {
+        return $this->price * (100 - $this->discount_percent);
+    }
+
     public function formattedSalePrice(): string
     {
-        $kopecks = $this->price * (100 - $this->discount_percent);
+        $kopecks = $this->salePriceInKopecks();
 
         return number_format($kopecks / 100, $kopecks % 100 === 0 ? 0 : 2, ',', ' ').' ₽';
     }

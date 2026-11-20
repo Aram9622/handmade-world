@@ -1,6 +1,10 @@
 @extends('layout')
 @section('title', ($register ? 'Регистрация' : 'Вход').' — Handmade Work')
 
+@push('metadata')
+    <meta name="robots" content="noindex, follow">
+@endpush
+
 @section('content')
 <section class="panel">
     <h1>{{ $register ? 'Создать аккаунт' : 'Войти' }}</h1>

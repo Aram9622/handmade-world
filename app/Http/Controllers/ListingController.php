@@ -58,7 +58,23 @@ class ListingController extends Controller
 
     public function show(Listing $listing)
     {
-        return view('listing', compact('listing'));
+        $product = [
+            '@context' => 'https://schema.org',
+            '@type' => 'Product',
+            'name' => $listing->title,
+            'description' => $listing->description,
+            'image' => [route('listings.photo', $listing)],
+            'category' => Listing::CATEGORIES[$listing->category],
+            'offers' => [
+                '@type' => 'Offer',
+                'url' => route('listings.show', $listing),
+                'priceCurrency' => 'RUB',
+                'price' => number_format($listing->salePriceInKopecks() / 100, 2, '.', ''),
+                'availability' => 'https://schema.org/InStock',
+            ],
+        ];
+
+        return view('listing', compact('listing', 'product'));
     }
 
     public function photo(Listing $listing)
