@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Listing extends Model
 {
     public const CATEGORIES = [
+        'paintings' => 'Картины',
         'ceramics' => 'Керамика',
         'jewelry' => 'Украшения',
         'textile' => 'Текстиль',
