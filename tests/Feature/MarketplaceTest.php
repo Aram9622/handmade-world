@@ -190,4 +190,31 @@ class MarketplaceTest extends TestCase
         $this->get('/?category=ceramics')->assertOk()
             ->assertSee('Результаты поиска')->assertDontSee('Новые изделия');
     }
+
+    public function test_a_maker_can_add_and_remove_the_public_phone_number(): void
+    {
+        $owner = User::factory()->create();
+        $data = [
+            'title' => 'Кружка',
+            'category' => 'ceramics',
+            'price' => 1500,
+            'description' => 'Ручная работа.',
+            'contact_email' => 'maker@example.com',
+        ];
+        $listing = Listing::create([...$data, 'user_id' => $owner->id, 'photo_path' => 'listings/cup.webp']);
+        $update = route('listings.update', $listing);
+        $url = route('listings.show', $listing);
+
+        $this->get($url)->assertOk()->assertDontSee('href="tel:', false);
+        $this->actingAs($owner)->put($update, [...$data, 'contact_phone' => '+7 900 ABC-45-67'])
+            ->assertSessionHasErrors('contact_phone');
+        $this->put($update, [...$data, 'contact_phone' => '+7 (900) 123-45-67'])->assertRedirect($url);
+        $this->assertSame('+79001234567', $listing->refresh()->contact_phone);
+
+        $this->post(route('logout'));
+        $this->get($url)->assertOk()->assertSee('href="tel:+79001234567"', false);
+
+        $this->actingAs($owner)->put($update, [...$data, 'contact_phone' => ''])->assertRedirect($url);
+        $this->assertNull($listing->refresh()->contact_phone);
+    }
 }

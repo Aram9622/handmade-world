@@ -30,6 +30,9 @@
         </dl>
         <p class="description">{{ $listing->description }}</p>
         <a class="button" href="mailto:{{ str_replace("%40", "@", rawurlencode($listing->contact_email)) }}?subject={{ rawurlencode($listing->title) }}">Написать продавцу</a>
+        @if($listing->contact_phone)
+            <p><a class="button outline" href="tel:{{ $listing->contact_phone }}">Позвонить {{ $listing->contact_phone }}</a></p>
+        @endif
         <p class="contact">Договоритесь с мастером о получении и оплате.</p>
         <p class="contact">{{ $listing->contact_email }}</p>
         @include('listing-share')

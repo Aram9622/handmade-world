@@ -13,6 +13,11 @@ class SaveListingRequest extends FormRequest
         if ($this->has('discount_percent') && $this->input('discount_percent') === null) {
             $this->merge(['discount_percent' => 0]);
         }
+
+        $phone = $this->input('contact_phone');
+        if (is_string($phone) && preg_match('/\A\+[0-9\h().-]{1,29}\z/u', $phone)) {
+            $this->merge(['contact_phone' => '+'.preg_replace('/[^0-9]/', '', $phone)]);
+        }
     }
 
     public function rules(): array
@@ -26,6 +31,7 @@ class SaveListingRequest extends FormRequest
             'city' => ['nullable', 'required_if:fulfillment_method,pickup,both', 'string', 'max:100'],
             'fulfillment_method' => ['nullable', Rule::in(array_keys(Listing::FULFILLMENT_METHODS))],
             'contact_email' => ['required', 'email', 'max:254'],
+            'contact_phone' => ['nullable', 'string', 'regex:/\A\+[1-9][0-9]{6,14}\z/'],
             'photo' => [$this->routeIs('listings.store') ? 'required' : 'sometimes', 'image', 'mimes:jpeg,png,webp', 'max:5120'],
         ];
     }
