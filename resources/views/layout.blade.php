@@ -14,6 +14,7 @@
         <nav aria-label="Основная навигация">
             <a class="nav-link" href="{{ route('catalog') }}#catalog">Каталог</a>
             @auth
+                <a class="nav-link" href="{{ route('listings.mine') }}">Мои изделия</a>
                 <form action="{{ route('logout') }}" method="post">@csrf <button class="nav-link" type="submit">Выйти</button></form>
             @else
                 <a class="nav-link" href="{{ route('login') }}">Войти</a>

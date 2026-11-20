@@ -52,12 +52,6 @@
             </div>
         @endforelse
     </div>
-    @if($listings->hasPages())
-        <nav class="pagination" aria-label="Страницы каталога">
-            @if($listings->previousPageUrl())<a href="{{ $listings->previousPageUrl() }}#catalog">Назад</a>@endif
-            <span>Страница {{ $listings->currentPage() }} из {{ $listings->lastPage() }}</span>
-            @if($listings->nextPageUrl())<a href="{{ $listings->nextPageUrl() }}#catalog">Далее</a>@endif
-        </nav>
-    @endif
+    @include('listing-pagination', ['anchor' => '#catalog'])
 </section>
 @endsection
