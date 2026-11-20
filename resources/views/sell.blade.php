@@ -1,6 +1,10 @@
 @extends('layout')
 @section('title', ($listing ? 'Редактировать изделие' : 'Продать изделие').' — Handmade Work')
 
+@push('metadata')
+    <meta name="robots" content="noindex, follow">
+@endpush
+
 @section('content')
 <section class="panel">
     <h1>{{ $listing ? 'Редактировать изделие' : 'Продать изделие' }}</h1>

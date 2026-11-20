@@ -1,6 +1,10 @@
 @extends('layout')
 @section('title', 'Мои изделия — Handmade Work')
 
+@push('metadata')
+    <meta name="robots" content="noindex, follow">
+@endpush
+
 @section('content')
 <section class="catalog">
     <h2>Мои изделия</h2>

@@ -1,13 +1,18 @@
 @extends('layout')
-@section('title', $listing->title.' — Handmade Work')
+@php
+    $description = $listing->formattedSalePrice().' · '.\Illuminate\Support\Str::limit(\Illuminate\Support\Str::squish($listing->description), 150);
+@endphp
+@section('title', $listing->title.' — купить изделие ручной работы | Handmade Work')
+@section('description', $description)
 
 @push('metadata')
     <link rel="canonical" href="{{ route('listings.show', $listing) }}">
     <meta property="og:type" content="website">
     <meta property="og:title" content="{{ $listing->title }}">
-    <meta property="og:description" content="{{ $listing->formattedSalePrice() }} · {{ \Illuminate\Support\Str::limit($listing->description, 160) }}">
+    <meta property="og:description" content="{{ $description }}">
     <meta property="og:image" content="{{ route('listings.photo', $listing) }}">
     <meta property="og:url" content="{{ route('listings.show', $listing) }}">
+    <script type="application/ld+json">{!! \Illuminate\Support\Js::encode($product) !!}</script>
     <script src="{{ asset('listing-share.js') }}" defer></script>
 @endpush
 
@@ -16,7 +21,7 @@
 <article class="detail">
     <img src="{{ route('listings.photo', $listing) }}" alt="{{ $listing->title }}">
     <div class="detail-copy">
-        <p class="category">{{ \App\Models\Listing::CATEGORIES[$listing->category] }}</p>
+        <p class="category"><a class="text-link" href="{{ route('catalog', ['category' => $listing->category]) }}">{{ \App\Models\Listing::CATEGORIES[$listing->category] }}</a></p>
         <h1>{{ $listing->title }}</h1>
         <p class="price">@include('listing-price')</p>
         <dl class="fulfillment">
