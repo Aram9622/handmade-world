@@ -12,7 +12,7 @@ if (typeof navigator.share === 'function') {
             await navigator.share({ text: sharePanel.dataset.message, url: link.value });
         } catch (error) {
             if (error.name !== 'AbortError') {
-                feedback.textContent = 'Выберите Telegram, ВКонтакте или скопируйте ссылку.';
+                feedback.textContent = sharePanel.dataset.shareError;
             }
         }
     });
@@ -22,10 +22,10 @@ copyLink.hidden = false;
 copyLink.addEventListener('click', async () => {
     try {
         await navigator.clipboard.writeText(link.value);
-        feedback.textContent = 'Ссылка скопирована.';
+        feedback.textContent = sharePanel.dataset.copied;
     } catch {
         link.focus();
         link.select();
-        feedback.textContent = 'Ссылка выделена. Скопируйте её вручную.';
+        feedback.textContent = sharePanel.dataset.copyFallback;
     }
 });

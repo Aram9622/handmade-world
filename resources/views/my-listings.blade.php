@@ -1,5 +1,5 @@
 @extends('layout')
-@section('title', 'Мои изделия — Handmade Work')
+@section('title', __('Мои изделия').' — Handmade Work')
 
 @push('metadata')
     <meta name="robots" content="noindex, follow">
@@ -7,7 +7,7 @@
 
 @section('content')
 <section class="catalog">
-    <h2>Мои изделия</h2>
+    <h2>{{ __('Мои изделия') }}</h2>
     <div class="grid">
         @forelse($listings as $listing)
             <article class="card">
@@ -19,13 +19,13 @@
                     </div>
                 </a>
                 <div class="card-actions">
-                    <a class="text-link" href="{{ route('listings.edit', $listing) }}" aria-label="Редактировать {{ $listing->title }}">Редактировать</a>
+                    <a class="text-link" href="{{ route('listings.edit', $listing) }}" aria-label="{{ __('Редактировать :title', ['title' => $listing->title]) }}">{{ __('Редактировать') }}</a>
                 </div>
             </article>
         @empty
             <div class="empty">
-                <p>У вас пока нет объявлений.</p>
-                <a class="button outline" href="{{ route('listings.create') }}">Добавить изделие</a>
+                <p>{{ __('У вас пока нет объявлений.') }}</p>
+                <a class="button outline" href="{{ route('listings.create') }}">{{ __('Добавить изделие') }}</a>
             </div>
         @endforelse
     </div>

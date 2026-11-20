@@ -1,19 +1,19 @@
 @extends('layout')
 
 @php
-    $categoryName = \App\Models\Listing::CATEGORIES[$category] ?? null;
+    $categoryName = $category !== '' ? __(\App\Models\Listing::CATEGORIES[$category]) : null;
     $catalogTitle = match ($category) {
-        '' => 'Изделия ручной работы',
-        'other' => 'Другие изделия ручной работы',
-        default => $categoryName.' ручной работы',
+        '' => __('Изделия ручной работы'),
+        'other' => __('Другие изделия ручной работы'),
+        default => __(':category ручной работы', ['category' => $categoryName]),
     };
     $page = $listings->currentPage();
     $editorial = config('category_editorial');
     $showEditorial = $search === '' && $sort === 'new' && $page === 1;
     $canonicalParameters = array_filter(['category' => $category, 'page' => $page > 1 ? $page : null]);
 @endphp
-@section('title', $catalogTitle.($page > 1 ? ' — страница '.$page : '').' | Handmade Work')
-@section('description', $catalogTitle.' от независимых мастеров. Смотрите фотографии, сравнивайте цены и связывайтесь с продавцами напрямую.')
+@section('title', $catalogTitle.($page > 1 ? (' — '.__('страница :page', ['page' => $page])) : '').' | Handmade Work')
+@section('description', __(':catalog от независимых мастеров. Смотрите фотографии, сравнивайте цены и связывайтесь с продавцами напрямую.', ['catalog' => $catalogTitle]))
 
 @push('metadata')
     @if($search !== '' || $sort !== 'new' || ($page > 1 && $listings->isEmpty()))
@@ -32,32 +32,32 @@
 
 <section id="catalog" class="catalog">
     @if(!$showEditorial)
-        <h1 class="catalog-title">{{ $categoryName ?? 'Каталог изделий' }}</h1>
+        <h1 class="catalog-title">{{ $categoryName ?? __('Каталог изделий') }}</h1>
     @else
-        <h2>{{ $categoryName ? 'Объявления мастеров' : 'Каталог изделий' }}</h2>
+        <h2>{{ $categoryName ? __('Объявления мастеров') : __('Каталог изделий') }}</h2>
     @endif
     <form class="filters" action="{{ route('catalog') }}#catalog" method="get">
-        <label>Поиск<input name="q" value="{{ $search }}" placeholder="Например, керамическая чашка" maxlength="100"></label>
-        <label>Категория
+        <label>{{ __('Поиск') }}<input name="q" value="{{ $search }}" placeholder="{{ __('Например, керамическая чашка') }}" maxlength="100"></label>
+        <label>{{ __('Категория') }}
             <select name="category">
-                <option value="">Все категории</option>
+                <option value="">{{ __('Все категории') }}</option>
                 @foreach(\App\Models\Listing::CATEGORIES as $key => $name)
-                    <option value="{{ $key }}" @selected($key === $category)>{{ $name }}</option>
+                    <option value="{{ $key }}" @selected($key === $category)>{{ __($name) }}</option>
                 @endforeach
             </select>
         </label>
-        <label>Сортировка
+        <label>{{ __('Сортировка') }}
             <select name="sort">
-                <option value="new" @selected($sort === 'new')>Сначала новые</option>
-                <option value="low" @selected($sort === 'low')>Сначала дешевле</option>
-                <option value="high" @selected($sort === 'high')>Сначала дороже</option>
+                <option value="new" @selected($sort === 'new')>{{ __('Сначала новые') }}</option>
+                <option value="low" @selected($sort === 'low')>{{ __('Сначала дешевле') }}</option>
+                <option value="high" @selected($sort === 'high')>{{ __('Сначала дороже') }}</option>
             </select>
         </label>
-        <button class="button" type="submit">Найти</button>
+        <button class="button" type="submit">{{ __('Найти') }}</button>
     </form>
     @include('errors')
     <div id="catalog-results">
-        <h3 class="results-heading">{{ $showFeed ? 'Новые изделия' : 'Результаты поиска' }}</h3>
+        <h3 class="results-heading">{{ $showFeed ? __('Новые изделия') : __('Результаты поиска') }}</h3>
     </div>
     <div class="grid">
         @forelse($listings as $listing)
@@ -65,14 +65,14 @@
                 <a href="{{ route('listings.show', $listing) }}">
                     <img src="{{ route('listings.photo', $listing) }}" alt="{{ $listing->title }}" loading="lazy">
                     <div class="card-copy">
-                        <span>{{ \App\Models\Listing::CATEGORIES[$listing->category] }}</span>
+                        <span>{{ __(\App\Models\Listing::CATEGORIES[$listing->category]) }}</span>
                         <h4>{{ $listing->title }}</h4>
                         <strong>@include('listing-price')</strong>
                         @if($listing->city)
                             <p class="contact">{{ $listing->city }}</p>
                         @endif
                         @if($showFeed && $listing->created_at)
-                            <time class="published-date" datetime="{{ $listing->created_at->toAtomString() }}">{{ $listing->created_at->locale('ru')->translatedFormat('j F Y') }}</time>
+                            <time class="published-date" datetime="{{ $listing->created_at->toAtomString() }}">{{ $listing->created_at->locale(app()->getLocale())->isoFormat('LL') }}</time>
                         @endif
                     </div>
                 </a>
@@ -80,14 +80,14 @@
         @empty
             <div class="empty">
                 @if($category && $search === '')
-                    <p>В этом разделе пока нет объявлений.</p>
-                    <a class="button outline" href="{{ route('catalog') }}#catalog">Смотреть весь каталог</a>
+                    <p>{{ __('В этом разделе пока нет объявлений.') }}</p>
+                    <a class="button outline" href="{{ route('catalog') }}#catalog">{{ __('Смотреть весь каталог') }}</a>
                 @elseif($search)
-                    <p>По этим фильтрам ничего не найдено.</p>
-                    <a class="button outline" href="{{ route('catalog') }}#catalog">Сбросить фильтры</a>
+                    <p>{{ __('По этим фильтрам ничего не найдено.') }}</p>
+                    <a class="button outline" href="{{ route('catalog') }}#catalog">{{ __('Сбросить фильтры') }}</a>
                 @else
-                    <p>В каталоге пока нет объявлений.</p>
-                    <a class="button outline" href="{{ route('listings.create') }}">Добавить первое изделие</a>
+                    <p>{{ __('В каталоге пока нет объявлений.') }}</p>
+                    <a class="button outline" href="{{ route('listings.create') }}">{{ __('Добавить первое изделие') }}</a>
                 @endif
             </div>
         @endforelse
