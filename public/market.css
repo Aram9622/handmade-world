@@ -110,3 +110,7 @@ small{font-weight:400;color:var(--muted);font-size:.88rem}
 .share-actions [hidden]{display:none}
 .share-status{color:var(--muted);font-size:.875rem;margin:.25rem 0}
 .share-status:empty{display:none}
+
+.fulfillment{display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;margin:1rem 0}
+.fulfillment dt{color:var(--muted);font-size:.875rem}
+.fulfillment dd{margin:0;overflow-wrap:anywhere;font-weight:600}

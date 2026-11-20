@@ -37,7 +37,11 @@
             <article class="card">
                 <a href="{{ route('listings.show', $listing) }}">
                     <img src="{{ route('listings.photo', $listing) }}" alt="{{ $listing->title }}" loading="lazy">
-                    <div class="card-copy"><span>{{ \App\Models\Listing::CATEGORIES[$listing->category] }}</span><h3>{{ $listing->title }}</h3><strong>@include('listing-price')</strong></div>
+                    <div class="card-copy"><span>{{ \App\Models\Listing::CATEGORIES[$listing->category] }}</span><h3>{{ $listing->title }}</h3><strong>@include('listing-price')</strong>
+                        @if($listing->city)
+                            <p class="contact">{{ $listing->city }}</p>
+                        @endif
+                    </div>
                 </a>
             </article>
         @empty

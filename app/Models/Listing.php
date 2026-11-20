@@ -14,7 +14,13 @@ class Listing extends Model
         'other' => 'Другое',
     ];
 
-    protected $fillable = ['user_id', 'title', 'category', 'description', 'price', 'discount_percent', 'contact_email', 'photo_path'];
+    public const FULFILLMENT_METHODS = [
+        'pickup' => 'Самовывоз',
+        'delivery' => 'Доставка',
+        'both' => 'Самовывоз и доставка',
+    ];
+
+    protected $fillable = ['user_id', 'title', 'category', 'description', 'price', 'discount_percent', 'city', 'fulfillment_method', 'contact_email', 'photo_path'];
 
     protected $attributes = ['discount_percent' => 0];
 
