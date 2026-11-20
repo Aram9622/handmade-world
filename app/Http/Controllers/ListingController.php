@@ -64,7 +64,7 @@ class ListingController extends Controller
             'name' => $listing->title,
             'description' => $listing->description,
             'image' => [route('listings.photo', $listing)],
-            'category' => Listing::CATEGORIES[$listing->category],
+            'category' => __(Listing::CATEGORIES[$listing->category]),
             'offers' => [
                 '@type' => 'Offer',
                 'url' => route('listings.show', $listing),
@@ -107,21 +107,21 @@ class ListingController extends Controller
             $request->file('photo'),
         );
 
-        return to_route('listings.show', $listing)->with('status', 'Объявление опубликовано.');
+        return to_route('listings.show', $listing)->with('status', __('Объявление опубликовано.'));
     }
 
     public function update(SaveListingRequest $request, Listing $listing)
     {
         $updated = $this->listings->update($listing, $request->safe()->except('photo'), $request->file('photo'));
-        abort_unless($updated, 409, self::CONFLICT_MESSAGE);
+        abort_unless($updated, 409, __(self::CONFLICT_MESSAGE));
 
-        return to_route('listings.show', $listing)->with('status', 'Изменения сохранены.');
+        return to_route('listings.show', $listing)->with('status', __('Изменения сохранены.'));
     }
 
     public function destroy(Listing $listing)
     {
-        abort_unless($this->listings->delete($listing), 409, self::CONFLICT_MESSAGE);
+        abort_unless($this->listings->delete($listing), 409, __(self::CONFLICT_MESSAGE));
 
-        return to_route('catalog')->with('status', 'Объявление снято с продажи.');
+        return to_route('catalog')->with('status', __('Объявление снято с продажи.'));
     }
 }

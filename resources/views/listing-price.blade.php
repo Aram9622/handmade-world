@@ -4,6 +4,6 @@
     @endif
     <span>{{ $listing->formattedSalePrice() }}</span>
     @if($listing->discount_percent > 0)
-        <span class="discount" aria-label="Скидка {{ $listing->discount_percent }} процентов">−{{ $listing->discount_percent }}%</span>
+        <span class="discount" aria-label="{{ __('Скидка :percent процентов', ['percent' => $listing->discount_percent]) }}">−{{ $listing->discount_percent }}%</span>
     @endif
 </span>

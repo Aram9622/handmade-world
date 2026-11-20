@@ -2,7 +2,7 @@
 @php
     $description = $listing->formattedSalePrice().' · '.\Illuminate\Support\Str::limit(\Illuminate\Support\Str::squish($listing->description), 150);
 @endphp
-@section('title', $listing->title.' — купить изделие ручной работы | Handmade Work')
+@section('title', __(':title — купить изделие ручной работы', ['title' => $listing->title]).' | Handmade Work')
 @section('description', $description)
 
 @push('metadata')
@@ -17,38 +17,38 @@
 @endpush
 
 @section('content')
-<a class="text-link back" href="{{ route('catalog') }}#catalog">К каталогу</a>
+<a class="text-link back" href="{{ route('catalog') }}#catalog">{{ __('К каталогу') }}</a>
 <article class="detail">
     <img src="{{ route('listings.photo', $listing) }}" alt="{{ $listing->title }}">
     <div class="detail-copy">
-        <p class="category"><a class="text-link" href="{{ route('catalog', ['category' => $listing->category]) }}">{{ \App\Models\Listing::CATEGORIES[$listing->category] }}</a></p>
+        <p class="category"><a class="text-link" href="{{ route('catalog', ['category' => $listing->category]) }}">{{ __(\App\Models\Listing::CATEGORIES[$listing->category]) }}</a></p>
         <h1>{{ $listing->title }}</h1>
         <p class="price">@include('listing-price')</p>
         <dl class="fulfillment">
             @if($listing->city)
-                <div><dt>Город</dt><dd>{{ $listing->city }}</dd></div>
+                <div><dt>{{ __('Город') }}</dt><dd>{{ $listing->city }}</dd></div>
             @endif
             <div>
-                <dt>Получение</dt>
-                <dd>{{ \App\Models\Listing::FULFILLMENT_METHODS[$listing->fulfillment_method] ?? 'По договорённости' }}</dd>
+                <dt>{{ __('Получение') }}</dt>
+                <dd>{{ __(\App\Models\Listing::FULFILLMENT_METHODS[$listing->fulfillment_method] ?? 'По договорённости') }}</dd>
             </div>
         </dl>
         <p class="description">{{ $listing->description }}</p>
-        <a class="button" href="mailto:{{ str_replace("%40", "@", rawurlencode($listing->contact_email)) }}?subject={{ rawurlencode($listing->title) }}">Написать продавцу</a>
+        <a class="button" href="mailto:{{ str_replace("%40", "@", rawurlencode($listing->contact_email)) }}?subject={{ rawurlencode($listing->title) }}">{{ __('Написать продавцу') }}</a>
         @if($listing->contact_phone)
-            <p><a class="button outline" href="tel:{{ $listing->contact_phone }}">Позвонить {{ $listing->contact_phone }}</a></p>
+            <p><a class="button outline" href="tel:{{ $listing->contact_phone }}">{{ __('Позвонить :phone', ['phone' => $listing->contact_phone]) }}</a></p>
         @endif
-        <p class="contact">Договоритесь с мастером о получении и оплате.</p>
+        <p class="contact">{{ __('Договоритесь с мастером о получении и оплате.') }}</p>
         <p class="contact">{{ $listing->contact_email }}</p>
         @include('listing-share')
         @can('update', $listing)
-            <p><a class="button outline" href="{{ route('listings.edit', $listing) }}">Редактировать</a></p>
+            <p><a class="button outline" href="{{ route('listings.edit', $listing) }}">{{ __('Редактировать') }}</a></p>
         @endcan
         @can('delete', $listing)
-            <form class="remove" action="{{ route('listings.destroy', $listing) }}" method="post" onsubmit="return confirm('Снять изделие с продажи?')">
+            <form class="remove" action="{{ route('listings.destroy', $listing) }}" method="post" data-confirm="{{ __('Снять изделие с продажи?') }}" onsubmit="return confirm(this.dataset.confirm)">
                 @csrf
                 @method('DELETE')
-                <button class="button outline" type="submit">Снять с продажи</button>
+                <button class="button outline" type="submit">{{ __('Снять с продажи') }}</button>
             </form>
         @endcan
     </div>

@@ -69,7 +69,7 @@ class ListingService
     {
         $path = $this->photos->putFile('listings', $photo);
         if ($path === false) {
-            throw new RuntimeException('Не удалось сохранить фотографию.');
+            throw new RuntimeException(__('Не удалось сохранить фотографию.'));
         }
 
         return $path;

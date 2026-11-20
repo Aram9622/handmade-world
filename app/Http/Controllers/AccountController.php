@@ -31,7 +31,7 @@ class AccountController extends Controller
         ]);
 
         if (! Auth::attempt($credentials)) {
-            return back()->withErrors(['email' => 'Проверьте почту и пароль.'])->onlyInput('email');
+            return back()->withErrors(['email' => __('Проверьте почту и пароль.')])->onlyInput('email');
         }
 
         $request->session()->regenerate();
