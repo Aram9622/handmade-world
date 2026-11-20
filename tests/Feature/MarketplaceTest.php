@@ -61,6 +61,7 @@ class MarketplaceTest extends TestCase
 
     public function test_a_maker_can_manage_only_their_own_listings(): void
     {
+        config(['filesystems.default' => 'public']);
         $disk = Storage::fake('local');
         $owner = User::factory()->create();
         $other = User::factory()->create();
