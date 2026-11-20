@@ -4,15 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\SaveListingRequest;
 use App\Models\Listing;
+use App\Services\ListingService;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\Request;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
-use RuntimeException;
-use Throwable;
 
 class ListingController extends Controller
 {
+    private const CONFLICT_MESSAGE = 'Объявление изменилось. Обновите страницу и попробуйте ещё раз.';
+
+    public function __construct(
+        private readonly ListingService $listings,
+        private readonly FilesystemAdapter $photos,
+    ) {}
+
     public function index(Request $request)
     {
         $filters = $request->validate([
@@ -56,10 +61,9 @@ class ListingController extends Controller
 
     public function photo(Listing $listing)
     {
-        $disk = Storage::disk('local');
-        abort_unless($disk->exists($listing->photo_path), 404);
+        abort_unless($this->photos->exists($listing->photo_path), 404);
 
-        return $disk->response($listing->photo_path, null, [
+        return $this->photos->response($listing->photo_path, null, [
             'Cache-Control' => 'no-cache',
             'X-Content-Type-Options' => 'nosniff',
         ]);
@@ -79,64 +83,27 @@ class ListingController extends Controller
 
     public function store(SaveListingRequest $request)
     {
-        $path = $this->storePhoto($request->file('photo'));
-
-        try {
-            $listing = Listing::create([
-                ...$request->safe()->except('photo'),
-                'user_id' => $request->user()->id,
-                'photo_path' => $path,
-            ]);
-        } catch (Throwable $exception) {
-            Storage::disk('local')->delete($path);
-            throw $exception;
-        }
+        $listing = $this->listings->create(
+            $request->user()->id,
+            $request->safe()->except('photo'),
+            $request->file('photo'),
+        );
 
         return to_route('listings.show', $listing)->with('status', 'Объявление опубликовано.');
     }
 
     public function update(SaveListingRequest $request, Listing $listing)
     {
-        $data = $request->safe()->except('photo');
-        $oldPhoto = $listing->photo_path;
-
-        if ($request->hasFile('photo')) {
-            $newPhoto = $this->storePhoto($request->file('photo'));
-
-            try {
-                $updated = Listing::whereKey($listing->id)->where('photo_path', $oldPhoto)
-                    ->update([...$data, 'photo_path' => $newPhoto]);
-                abort_unless($updated, 409, 'Объявление изменилось. Обновите страницу и попробуйте ещё раз.');
-            } catch (Throwable $exception) {
-                Storage::disk('local')->delete($newPhoto);
-                throw $exception;
-            }
-
-            Storage::disk('local')->delete($oldPhoto);
-        } else {
-            $listing->update($data);
-        }
+        $updated = $this->listings->update($listing, $request->safe()->except('photo'), $request->file('photo'));
+        abort_unless($updated, 409, self::CONFLICT_MESSAGE);
 
         return to_route('listings.show', $listing)->with('status', 'Изменения сохранены.');
     }
 
     public function destroy(Listing $listing)
     {
-        $deleted = Listing::whereKey($listing->id)->where('photo_path', $listing->photo_path)->delete();
-        abort_unless($deleted, 409, 'Объявление изменилось. Обновите страницу и попробуйте ещё раз.');
-
-        Storage::disk('local')->delete($listing->photo_path);
+        abort_unless($this->listings->delete($listing), 409, self::CONFLICT_MESSAGE);
 
         return to_route('catalog')->with('status', 'Объявление снято с продажи.');
-    }
-
-    private function storePhoto(UploadedFile $photo): string
-    {
-        $path = $photo->store('listings', 'local');
-        if ($path === false) {
-            throw new RuntimeException('Не удалось сохранить фотографию.');
-        }
-
-        return $path;
     }
 }
