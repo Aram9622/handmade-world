@@ -12,13 +12,16 @@
         <p class="description">{{ $listing->description }}</p>
         <a class="button" href="mailto:{{ str_replace("%40", "@", rawurlencode($listing->contact_email)) }}?subject={{ rawurlencode($listing->title) }}">Написать продавцу</a>
         <p class="contact">{{ $listing->contact_email }}</p>
-        @if(auth()->id() === $listing->user_id)
+        @can('update', $listing)
+            <p><a class="button outline" href="{{ route('listings.edit', $listing) }}">Редактировать</a></p>
+        @endcan
+        @can('delete', $listing)
             <form class="remove" action="{{ route('listings.destroy', $listing) }}" method="post" onsubmit="return confirm('Снять изделие с продажи?')">
                 @csrf
                 @method('DELETE')
                 <button class="button outline" type="submit">Снять с продажи</button>
             </form>
-        @endif
+        @endcan
     </div>
 </article>
 @endsection

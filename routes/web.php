@@ -16,8 +16,11 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::view('/sell', 'sell')->name('listings.create');
+    Route::get('/my-items', [ListingController::class, 'mine'])->name('listings.mine');
+    Route::view('/sell', 'sell', ['listing' => null])->name('listings.create');
     Route::post('/items', [ListingController::class, 'store'])->middleware('throttle:10,1')->name('listings.store');
-    Route::delete('/items/{listing}', [ListingController::class, 'destroy'])->name('listings.destroy');
+    Route::get('/items/{listing}/edit', [ListingController::class, 'edit'])->can('update', 'listing')->name('listings.edit');
+    Route::put('/items/{listing}', [ListingController::class, 'update'])->can('update', 'listing')->middleware('throttle:10,1')->name('listings.update');
+    Route::delete('/items/{listing}', [ListingController::class, 'destroy'])->can('delete', 'listing')->name('listings.destroy');
     Route::post('/logout', [AccountController::class, 'logout'])->name('logout');
 });
