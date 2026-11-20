@@ -56,7 +56,7 @@ class ListingController extends Controller
         return view('catalog', compact('listings', 'search', 'category', 'sort', 'showFeed'));
     }
 
-    public function show(Listing $listing)
+    public function show(Request $request, Listing $listing)
     {
         $product = [
             '@context' => 'https://schema.org',
@@ -74,7 +74,13 @@ class ListingController extends Controller
             ],
         ];
 
-        return view('listing', compact('listing', 'product'));
+        $listing->loadCount('likes');
+        $user = $request->user();
+        $liked = $user && $listing->likes()->whereKey($user->id)->exists();
+        $comments = $listing->comments()->with('author:id,name')->latest('id')->paginate(15, pageName: 'comments_page')
+            ->fragment('comments');
+
+        return view('listing', compact('listing', 'product', 'liked', 'comments'));
     }
 
     public function photo(Listing $listing)

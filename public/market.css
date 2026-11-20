@@ -162,3 +162,14 @@ small{font-weight:400;color:var(--muted);font-size:.88rem}
  .nav{flex-wrap:wrap;padding:12px 0}
  .nav .locale-switcher{margin-left:auto}
 }
+
+.listing-actions{display:flex;align-items:center;gap:.65rem 1rem;flex-wrap:wrap;margin-top:1rem}
+.listing-actions form{margin:0}
+.listing-actions .share{flex-basis:100%;margin-top:0}
+.listing-actions [aria-pressed=true]{background:var(--tint)}
+.listing-comments{max-width:760px;margin:0 0 3rem;scroll-margin-top:1rem}
+.comment-form{margin:1rem 0 1.5rem}
+.listing-comment{padding:1rem 0;border-bottom:1px solid var(--line)}
+.comment-meta{display:flex;gap:.5rem 1rem;flex-wrap:wrap;overflow-wrap:anywhere}
+.comment-meta time{color:var(--muted);font-size:.875rem}
+.listing-comment p{white-space:pre-wrap;overflow-wrap:anywhere;margin:.45rem 0 0}

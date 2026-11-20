@@ -17,6 +17,7 @@ return [
         'city' => ['required_if' => 'Укажите город, если предлагаете самовывоз.'],
     ],
     'attributes' => [
+        'comment' => 'Комментарий',
         'city' => 'Город', 'fulfillment_method' => 'Способ получения',
         'name' => 'Имя', 'email' => 'Почта', 'password' => 'Пароль', 'title' => 'Название',
         'category' => 'Категория', 'description' => 'Описание', 'price' => 'Цена',
