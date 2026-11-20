@@ -100,3 +100,13 @@ small{font-weight:400;color:var(--muted);font-size:.88rem}
  .nav{flex-wrap:wrap;justify-content:center;padding:12px 0}
  .nav nav{flex-wrap:wrap;justify-content:center}
 }
+
+.listing-price{display:inline-flex;align-items:baseline;flex-wrap:wrap;gap:.45rem}
+.original-price{color:var(--muted);font-size:.85em;font-weight:400}
+.discount{background:var(--tint);color:var(--accent);border-radius:5px;padding:.1em .38em;font-size:.875rem;font-weight:700}
+.share{margin-top:1rem}
+.share summary{cursor:pointer}
+.share-actions{display:flex;flex-wrap:wrap;gap:.5rem;margin:.65rem 0}
+.share-actions [hidden]{display:none}
+.share-status{color:var(--muted);font-size:.875rem;margin:.25rem 0}
+.share-status:empty{display:none}

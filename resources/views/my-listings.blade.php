@@ -11,7 +11,7 @@
                     <img src="{{ route('listings.photo', $listing) }}" alt="" loading="lazy">
                     <div class="card-copy">
                         <h3>{{ $listing->title }}</h3>
-                        <strong>{{ number_format($listing->price, 0, ',', ' ') }} ₽</strong>
+                        <strong>@include('listing-price')</strong>
                     </div>
                 </a>
                 <div class="card-actions">

@@ -14,5 +14,16 @@ class Listing extends Model
         'other' => 'Другое',
     ];
 
-    protected $fillable = ['user_id', 'title', 'category', 'description', 'price', 'contact_email', 'photo_path'];
+    protected $fillable = ['user_id', 'title', 'category', 'description', 'price', 'discount_percent', 'contact_email', 'photo_path'];
+
+    protected $attributes = ['discount_percent' => 0];
+
+    protected $casts = ['discount_percent' => 'integer'];
+
+    public function formattedSalePrice(): string
+    {
+        $kopecks = $this->price * (100 - $this->discount_percent);
+
+        return number_format($kopecks / 100, $kopecks % 100 === 0 ? 0 : 2, ',', ' ').' ₽';
+    }
 }
