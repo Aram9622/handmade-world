@@ -40,7 +40,24 @@
         @endif
         <p class="contact">{{ __('Договоритесь с мастером о получении и оплате.') }}</p>
         <p class="contact">{{ $listing->contact_email }}</p>
-        @include('listing-share')
+        <div class="listing-actions" id="interactions">
+            @auth
+                <form action="{{ route($liked ? 'listings.unlike' : 'listings.like', $listing) }}" method="post">
+                    @csrf
+                    @method($liked ? 'DELETE' : 'PUT')
+                    <button type="submit" class="button outline small" aria-pressed="{{ $liked ? 'true' : 'false' }}">
+                        <span aria-hidden="true">{{ $liked ? '♥' : '♡' }}</span>
+                        {{ __('Нравится') }} · {{ $listing->likes_count }}
+                    </button>
+                </form>
+            @else
+                <a class="button outline small" href="{{ route('listings.participate', $listing) }}" aria-label="{{ __('Войти, чтобы поставить лайк') }}">
+                    <span aria-hidden="true">♡</span> {{ __('Нравится') }} · {{ $listing->likes_count }}
+                </a>
+            @endauth
+            <a class="text-link" href="#comments">{{ __('Комментарии') }} · {{ $comments->total() }}</a>
+            @include('listing-share')
+        </div>
         @can('update', $listing)
             <p><a class="button outline" href="{{ route('listings.edit', $listing) }}">{{ __('Редактировать') }}</a></p>
         @endcan
@@ -53,4 +70,5 @@
         @endcan
     </div>
 </article>
+@include('listing-comments')
 @endsection
