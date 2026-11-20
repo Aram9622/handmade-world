@@ -19,8 +19,18 @@
         <p class="category">{{ \App\Models\Listing::CATEGORIES[$listing->category] }}</p>
         <h1>{{ $listing->title }}</h1>
         <p class="price">@include('listing-price')</p>
+        <dl class="fulfillment">
+            @if($listing->city)
+                <div><dt>Город</dt><dd>{{ $listing->city }}</dd></div>
+            @endif
+            <div>
+                <dt>Получение</dt>
+                <dd>{{ \App\Models\Listing::FULFILLMENT_METHODS[$listing->fulfillment_method] ?? 'По договорённости' }}</dd>
+            </div>
+        </dl>
         <p class="description">{{ $listing->description }}</p>
         <a class="button" href="mailto:{{ str_replace("%40", "@", rawurlencode($listing->contact_email)) }}?subject={{ rawurlencode($listing->title) }}">Написать продавцу</a>
+        <p class="contact">Договоритесь с мастером о получении и оплате.</p>
         <p class="contact">{{ $listing->contact_email }}</p>
         @include('listing-share')
         @can('update', $listing)

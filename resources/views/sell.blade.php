@@ -29,6 +29,18 @@
             <small>JPG, PNG или WebP, до 5 МБ</small>
             <input type="file" name="photo" accept="image/jpeg,image/png,image/webp" @required(!$listing)>
         </label>
+        <label>Город
+            <small>Укажите город, если предлагаете самовывоз.</small>
+            <input name="city" maxlength="100" autocomplete="address-level2" value="{{ old('city', $listing?->city) }}">
+        </label>
+        <label>Способ получения
+            <select name="fulfillment_method">
+                <option value="">По договорённости</option>
+                @foreach(\App\Models\Listing::FULFILLMENT_METHODS as $key => $label)
+                    <option value="{{ $key }}" @selected(old('fulfillment_method', $listing?->fulfillment_method) === $key)>{{ $label }}</option>
+                @endforeach
+            </select>
+        </label>
         <label>Почта для покупателей <small>Адрес будет виден в объявлении.</small><input type="email" name="contact_email" maxlength="254" value="{{ old('contact_email', $listing?->contact_email) }}" required></label>
         <button class="button" type="submit">{{ $listing ? 'Сохранить изменения' : 'Опубликовать объявление' }}</button>
     </form>

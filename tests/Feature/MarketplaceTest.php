@@ -139,4 +139,33 @@ class MarketplaceTest extends TestCase
         $this->actingAs($owner)->put($update, [...$data, 'discount_percent' => ''])->assertRedirect($url);
         $this->assertSame(0, $listing->refresh()->discount_percent);
     }
+
+    public function test_a_maker_can_offer_pickup_and_delivery(): void
+    {
+        $owner = User::factory()->create();
+        $data = [
+            'title' => 'Кружка',
+            'category' => 'ceramics',
+            'price' => 1500,
+            'description' => 'Ручная работа.',
+            'contact_email' => 'maker@example.com',
+        ];
+        $listing = Listing::create([...$data, 'user_id' => $owner->id, 'photo_path' => 'listings/cup.webp']);
+        $update = route('listings.update', $listing);
+        $url = route('listings.show', $listing);
+
+        $this->get($url)->assertOk()->assertSee('По договорённости');
+        $this->actingAs($owner)->put($update, [...$data, 'fulfillment_method' => 'pickup'])
+            ->assertSessionHasErrors('city');
+        $this->put($update, [...$data, 'fulfillment_method' => 'courier'])
+            ->assertSessionHasErrors('fulfillment_method');
+
+        $this->put($update, [...$data, 'city' => 'Казань', 'fulfillment_method' => 'both'])->assertRedirect($url);
+        $this->assertDatabaseHas('listings', ['id' => $listing->id, 'city' => 'Казань', 'fulfillment_method' => 'both']);
+        $this->get($url)->assertOk()->assertSee('Казань')->assertSee('Самовывоз и доставка');
+        $this->get('/')->assertOk()->assertSee('Казань');
+
+        $this->put($update, [...$data, 'city' => '', 'fulfillment_method' => 'delivery'])->assertRedirect($url);
+        $this->assertDatabaseHas('listings', ['id' => $listing->id, 'city' => null, 'fulfillment_method' => 'delivery']);
+    }
 }
