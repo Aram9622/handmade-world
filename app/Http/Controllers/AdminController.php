@@ -12,10 +12,12 @@ use Illuminate\View\View;
 
 class AdminController extends Controller
 {
+    public const SECTIONS = ['listings' => 'Объявления', 'comments' => 'Комментарии', 'users' => 'Пользователи'];
+
     public function index(Request $request): View
     {
         $filters = $request->validate([
-            'section' => ['nullable', Rule::in(['users', 'listings', 'comments'])],
+            'section' => ['nullable', Rule::in(array_keys(self::SECTIONS))],
             'q' => ['nullable', 'string', 'max:100'],
         ]);
         $section = $filters['section'] ?? 'listings';
@@ -36,7 +38,7 @@ class AdminController extends Controller
             'users' => User::count(),
         ];
 
-        return view('admin.index', compact('records', 'section', 'search', 'totals'));
+        return view('admin.index', ['sections' => self::SECTIONS, ...compact('records', 'section', 'search', 'totals')]);
     }
 
     public function account(Request $request, User $user): RedirectResponse

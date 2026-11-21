@@ -7,6 +7,7 @@
     @stack('metadata')
     <title>@yield('title', __('Handmade Work — изделия ручной работы'))</title>
     <link rel="stylesheet" href="{{ asset('market.css') }}">
+    @stack('styles')
     <script src="{{ asset('market-motion.js') }}" defer></script>
 </head>
 <body>

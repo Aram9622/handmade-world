@@ -19,6 +19,10 @@ class AdminTest extends TestCase
 
         $this->artisan('admin:grant', ['email' => $user->email])->assertSuccessful();
         $this->actingAs($user->refresh())->get('/admin')->assertOk()->assertSee('Управление площадкой');
+        $this->get('/admin?section=users')->assertOk()
+            ->assertSee('<table class="admin-table">', false)
+            ->assertSee($user->email)
+            ->assertSee('Суперадминистратор');
         $this->patch(route('admin.users.update', $user), ['suspended' => 1])->assertForbidden();
     }
 
