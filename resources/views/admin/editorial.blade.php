@@ -35,20 +35,22 @@
         @method('PUT')
         <section class="admin-panel">
             <h2>{{ __($pages[$page]) }} · {{ $languages[$language] }}</h2>
-            <div class="admin-editor-fields">
-                @foreach($fields as $name => [$label, $limit])
-                    <label>{{ __($label) }}
-                        <input name="{{ $name }}" value="{{ old($name, $content[$name]) }}" maxlength="{{ $limit }}" @required($name !== 'heading')>
+            <div class="admin-editor-layout">
+                <div class="admin-editor-fields">
+                    @foreach($fields as $name => [$label, $limit])
+                        <label>{{ __($label) }}
+                            <input name="{{ $name }}" value="{{ old($name, $content[$name]) }}" maxlength="{{ $limit }}" @required($name !== 'heading') @error($name) aria-invalid="true" @enderror>
+                        </label>
+                    @endforeach
+                    <label class="editor-wide">{{ __('Описание') }}
+                        <textarea name="intro" rows="4" maxlength="1500" required @error('intro') aria-invalid="true" @enderror>{{ old('intro', $content['intro']) }}</textarea>
                     </label>
-                @endforeach
-                <label class="editor-wide">{{ __('Описание') }}
-                    <textarea name="intro" rows="4" maxlength="1500" required>{{ old('intro', $content['intro']) }}</textarea>
-                </label>
-                <div class="editor-wide">
+                </div>
+                <div class="admin-editor-cover">
                     <img class="editorial-thumbnail" src="{{ $content['cover_url'] }}" alt="{{ $content['alt'] }}">
                     <label>{{ __('Заменить обложку') }}
-                        <small>{{ __('JPG, PNG или WebP, до 5 МБ') }}</small>
-                        <input type="file" name="cover" accept="image/jpeg,image/png,image/webp">
+                        <small id="cover-formats">{{ __('JPG, PNG или WebP, до 5 МБ') }}</small>
+                        <input type="file" name="cover" accept="image/jpeg,image/png,image/webp" aria-describedby="cover-formats" @error('cover') aria-invalid="true" @enderror>
                     </label>
                 </div>
             </div>
