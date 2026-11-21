@@ -30,11 +30,16 @@
         </nav>
     </div>
 </header>
-<main class="wrap">
+<main>
     @if(session('status'))
-        <p class="notice" role="status">{{ session('status') }}</p>
+        <div class="wrap">
+            <p class="notice" role="status">{{ session('status') }}</p>
+        </div>
     @endif
-    @yield('content')
+    @yield('cover')
+    <div class="wrap">
+        @yield('content')
+    </div>
 </main>
 <footer class="footer"><div class="wrap"><strong>Handmade Work</strong><span>{{ __('Площадка для мастеров и ценителей ручной работы') }}</span></div></footer>
 </body>
