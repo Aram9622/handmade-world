@@ -106,3 +106,9 @@
     @include('listing-pagination', ['anchor' => '#catalog-results'])
 </section>
 @endsection
+
+@if($showEditorial && !$categoryName)
+    @section('after-content')
+        @include('home-workshop')
+    @endsection
+@endif
