@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\SaveListingRequest;
 use App\Models\Listing;
+use App\Services\CategorySubscriptions;
 use App\Services\EditorialContent;
 use App\Services\ListingService;
 use Illuminate\Filesystem\FilesystemAdapter;
@@ -19,7 +20,7 @@ class ListingController extends Controller
         private readonly FilesystemAdapter $photos,
     ) {}
 
-    public function index(Request $request, EditorialContent $content)
+    public function index(Request $request, EditorialContent $content, CategorySubscriptions $subscriptions)
     {
         $filters = $request->validate([
             'q' => ['nullable', 'string', 'max:100'],
@@ -30,7 +31,14 @@ class ListingController extends Controller
         $search = trim($filters['q'] ?? '');
         $category = $filters['category'] ?? '';
         $sort = $filters['sort'] ?? 'new';
+        $subscriptionFeed = $request->routeIs('subscriptions.index');
+        $user = $request->user();
+        $subscribedCategories = $user && ($subscriptionFeed || $category !== '') ? $subscriptions->categories($user) : [];
         $query = Listing::visible();
+
+        if ($subscriptionFeed) {
+            $query->whereIn('category', $subscribedCategories);
+        }
 
         if ($search !== '') {
             $escapedSearch = str_replace(['!', '%', '_'], ['!!', '!%', '!_'], mb_strtolower($search));
@@ -56,7 +64,7 @@ class ListingController extends Controller
 
         $editorial = $content->all(app()->getLocale());
 
-        return view('catalog', compact('editorial', 'listings', 'search', 'category', 'sort', 'showFeed'));
+        return view('catalog', compact('editorial', 'listings', 'search', 'category', 'sort', 'showFeed', 'subscriptionFeed', 'subscribedCategories'));
     }
 
     public function show(Request $request, Listing $listing, EditorialContent $editorial)

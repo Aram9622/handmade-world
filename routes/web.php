@@ -2,10 +2,12 @@
 
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CategorySubscriptionController;
 use App\Http\Controllers\EditorialController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\ListingInteractionController;
 use App\Http\Controllers\SearchIndexController;
+use App\Models\Listing;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/editorial-images/{page}/{language}/{slot}', [EditorialController::class, 'image'])
@@ -26,6 +28,15 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
+    Route::get('/subscriptions', [ListingController::class, 'index'])->name('subscriptions.index');
+    Route::controller(CategorySubscriptionController::class)
+        ->prefix('/categories/{category}/subscription')->whereIn('category', array_keys(Listing::CATEGORIES))
+        ->name('subscriptions.')->group(function () {
+            Route::get('/', 'participate')->name('participate');
+            Route::put('/', 'store')->name('store');
+            Route::delete('/', 'destroy')->name('destroy');
+        });
+
     Route::get('/items/{listing}/participate', [ListingInteractionController::class, 'participate'])->name('listings.participate');
     Route::put('/items/{listing}/like', [ListingInteractionController::class, 'like'])->middleware('throttle:30,1')->name('listings.like');
     Route::delete('/items/{listing}/like', [ListingInteractionController::class, 'unlike'])->middleware('throttle:30,1')->name('listings.unlike');
