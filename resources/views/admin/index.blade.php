@@ -12,18 +12,39 @@
         @endforeach
     </nav>
 
+    @include('admin.activity')
+
     <section class="admin-panel" aria-labelledby="admin-section-title">
         <header class="admin-panel-header">
             <div>
                 <h2 id="admin-section-title">{{ __($sections[$section]) }}</h2>
                 <p>{{ __('Найдено: :count', ['count' => $records->total()]) }}</p>
             </div>
-            <form class="admin-search" action="{{ route('admin.index') }}" method="get">
-                <input type="hidden" name="section" value="{{ $section }}">
-                <input name="q" type="search" value="{{ $search }}" maxlength="100" aria-label="{{ __('Поиск') }}" placeholder="{{ __('Поиск') }}">
-                <button class="button small" type="submit">{{ __('Найти') }}</button>
-            </form>
         </header>
+        <form class="admin-filters" action="{{ route('admin.index') }}" method="get">
+            <input type="hidden" name="section" value="{{ $section }}">
+            <label>{{ __('Поиск') }}
+                <input name="q" type="search" value="{{ $search }}" maxlength="100" placeholder="{{ __('Поиск') }}">
+            </label>
+            <label>{{ __('Статус') }}
+                <select name="status">
+                    <option value="">{{ __('Все статусы') }}</option>
+                    @foreach($statuses as $key => $label)
+                        <option value="{{ $key }}" @selected($status === $key)>{{ __($label) }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <label>{{ __('Сортировка') }}
+                <select name="sort">
+                    <option value="new" @selected($sort === 'new')>{{ __('Сначала новые') }}</option>
+                    <option value="old" @selected($sort === 'old')>{{ __('Сначала старые') }}</option>
+                </select>
+            </label>
+            <button class="button small" type="submit">{{ __('Применить') }}</button>
+            @if($search !== '' || $status !== '' || $sort !== 'new')
+                <a class="text-link" href="{{ route('admin.index', ['section' => $section]) }}">{{ __('Сбросить фильтры') }}</a>
+            @endif
+        </form>
         @include('errors')
 
         @if($records->isEmpty())

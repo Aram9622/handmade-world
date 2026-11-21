@@ -14,6 +14,10 @@ class AdminController extends Controller
 {
     public const SECTIONS = ['listings' => 'Объявления', 'comments' => 'Комментарии', 'users' => 'Пользователи'];
 
+    private const CONTENT_STATUSES = ['visible' => 'Опубликовано', 'hidden' => 'Скрыто'];
+
+    private const ACCOUNT_STATUSES = ['active' => 'Активные аккаунты', 'suspended' => 'Заблокированные аккаунты', 'admins' => 'Суперадминистраторы'];
+
     public function index(Request $request): View
     {
         $filters = $request->validate([
@@ -21,6 +25,13 @@ class AdminController extends Controller
             'q' => ['nullable', 'string', 'max:100'],
         ]);
         $section = $filters['section'] ?? 'listings';
+        $statuses = $section === 'users' ? self::ACCOUNT_STATUSES : self::CONTENT_STATUSES;
+        $options = $request->validate([
+            'status' => ['nullable', Rule::in(array_keys($statuses))],
+            'sort' => ['nullable', Rule::in(['new', 'old'])],
+        ]);
+        $status = $options['status'] ?? '';
+        $sort = $options['sort'] ?? 'new';
         $search = $filters['q'] ?? '';
         $pattern = '%'.$search.'%';
 
@@ -30,7 +41,17 @@ class AdminController extends Controller
             'comments' => ListingComment::query()->with(['author:id,name', 'listing:id,title'])->whereLike('body', $pattern),
         };
 
-        $records = $query->latest('id')->paginate(20)->withQueryString();
+        match ($status) {
+            'visible' => $query->whereNull('hidden_at'),
+            'hidden' => $query->whereNotNull('hidden_at'),
+            'active' => $query->whereNull('suspended_at'),
+            'suspended' => $query->whereNotNull('suspended_at'),
+            'admins' => $query->where('is_super_admin', true),
+            default => null,
+        };
+
+        $direction = $sort === 'old' ? 'asc' : 'desc';
+        $records = $query->orderBy('created_at', $direction)->orderBy('id', $direction)->paginate(20)->withQueryString();
 
         $totals = [
             'listings' => Listing::count(),
@@ -38,7 +59,37 @@ class AdminController extends Controller
             'users' => User::count(),
         ];
 
-        return view('admin.index', ['sections' => self::SECTIONS, ...compact('records', 'section', 'search', 'totals')]);
+        $activity = $this->weeklyActivity($section);
+
+        return view('admin.index', [
+            'sections' => self::SECTIONS,
+            ...compact('records', 'section', 'search', 'totals', 'activity', 'statuses', 'status', 'sort'),
+        ]);
+    }
+
+    private function weeklyActivity(string $section): array
+    {
+        $today = now()->startOfDay();
+        $firstDay = $today->copy()->subDays(6);
+        $query = match ($section) {
+            'users' => User::query(),
+            'listings' => Listing::query(),
+            'comments' => ListingComment::query(),
+        };
+
+        $counts = $query->where('created_at', '>=', $firstDay)
+            ->where('created_at', '<', $today->copy()->addDay())
+            ->selectRaw('DATE(created_at) AS day, COUNT(*) AS total')
+            ->groupByRaw('DATE(created_at)')
+            ->pluck('total', 'day');
+
+        $activity = [];
+        for ($offset = 0; $offset < 7; $offset++) {
+            $day = $firstDay->copy()->addDays($offset);
+            $activity[] = ['day' => $day, 'count' => (int) $counts->get($day->toDateString(), 0)];
+        }
+
+        return $activity;
     }
 
     public function account(Request $request, User $user): RedirectResponse

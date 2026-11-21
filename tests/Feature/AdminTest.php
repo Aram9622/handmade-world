@@ -89,4 +89,29 @@ class AdminTest extends TestCase
         $this->actingAs($admin)->patch(route('admin.users.update', $maker), ['suspended' => 0])->assertRedirect();
         $this->assertNull($maker->refresh()->suspended_at);
     }
+
+    public function test_admin_can_filter_sort_and_see_activity_for_the_current_section(): void
+    {
+        $this->travelTo(\Illuminate\Support\Carbon::parse('2026-11-21 12:00:00'));
+        $admin = User::factory()->create(['name' => 'Проверяющий', 'created_at' => now()->subDays(10)]);
+        $admin->forceFill(['is_super_admin' => true])->save();
+        User::factory()->create(['name' => 'Второй мастер', 'created_at' => now()]);
+        User::factory()->create(['name' => 'Первый мастер', 'created_at' => now()->subDays(2)]);
+        $suspended = User::factory()->create(['name' => 'Заблокированный мастер', 'created_at' => now()->subDays(6)]);
+        $suspended->forceFill(['suspended_at' => now()])->save();
+
+        $this->actingAs($admin)->get('/admin?section=users&status=active&sort=old&q=мастер')
+            ->assertOk()
+            ->assertSee('Новые регистрации')
+            ->assertSee('Всего за период: 3')
+            ->assertSeeInOrder(['Первый мастер', 'Второй мастер'])
+            ->assertDontSee('Заблокированный мастер');
+
+        $this->get('/admin?section=users&status=suspended')->assertOk()
+            ->assertSee('Заблокированный мастер')
+            ->assertDontSee('Первый мастер');
+        $this->get('/admin?section=listings')->assertOk()
+            ->assertSee('Новые объявления')
+            ->assertSee('Всего за период: 0');
+    }
 }
