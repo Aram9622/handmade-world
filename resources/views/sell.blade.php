@@ -17,7 +17,7 @@
         <label>{{ __('Название') }}<input name="title" maxlength="100" value="{{ old('title', $listing?->title) }}" required></label>
         <label>{{ __('Категория') }}<select name="category" required><option value="">{{ __('Выберите категорию') }}</option>
         @foreach(\App\Models\Listing::CATEGORIES as $key => $name)
-            <option value="{{ $key }}" @selected(old('category', $listing?->category) === $key)>{{ __($name) }}</option>
+            <option value="{{ $key }}" @selected(old('category', $listing?->category) === $key)>{{ $categories[$key]['title'] }}</option>
         @endforeach
         </select></label>
         <label>{{ __('Описание') }}<textarea name="description" rows="5" maxlength="2000" placeholder="{{ __('Расскажите о материалах, размере и особенностях изделия') }}" required>{{ old('description', $listing?->description) }}</textarea></label>

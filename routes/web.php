@@ -2,10 +2,14 @@
 
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\EditorialController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\ListingInteractionController;
 use App\Http\Controllers\SearchIndexController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/editorial-images/{page}/{language}/{slot}', [EditorialController::class, 'image'])
+    ->where('slot', 'cover|work-[0-3]')->name('editorial.image');
 
 Route::get('/robots.txt', [SearchIndexController::class, 'robots'])->name('robots');
 Route::get('/sitemap.xml', [SearchIndexController::class, 'sitemap'])->name('sitemap');
@@ -27,7 +31,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/items/{listing}/like', [ListingInteractionController::class, 'unlike'])->middleware('throttle:30,1')->name('listings.unlike');
     Route::post('/items/{listing}/comments', [ListingInteractionController::class, 'comment'])->middleware('throttle:10,1')->name('listings.comment');
     Route::get('/my-items', [ListingController::class, 'mine'])->name('listings.mine');
-    Route::view('/sell', 'sell', ['listing' => null])->name('listings.create');
+    Route::get('/sell', [ListingController::class, 'create'])->name('listings.create');
     Route::post('/items', [ListingController::class, 'store'])->middleware('throttle:10,1')->name('listings.store');
     Route::get('/items/{listing}/edit', [ListingController::class, 'edit'])->can('update', 'listing')->name('listings.edit');
     Route::put('/items/{listing}', [ListingController::class, 'update'])->can('update', 'listing')->middleware('throttle:10,1')->name('listings.update');
@@ -37,6 +41,8 @@ Route::middleware('auth')->group(function () {
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'can:manage-marketplace'])->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('index');
+    Route::get('/content/{page?}/{language?}', [EditorialController::class, 'edit'])->name('editorial.edit');
+    Route::put('/content/{page}/{language}', [EditorialController::class, 'update'])->name('editorial.update');
     Route::patch('/users/{user}', [AdminController::class, 'account'])->name('users.update');
     Route::patch('/listings/{listing}', [AdminController::class, 'listing'])->name('listings.update');
     Route::patch('/comments/{comment}', [AdminController::class, 'comment'])->name('comments.update');
