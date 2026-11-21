@@ -23,9 +23,13 @@
     @endif
 @endpush
 
-@if($showEditorial && !$categoryName)
+@if($showEditorial)
     @section('cover')
-        @include('home-cover')
+        @if($categoryName)
+            @include('category-cover', ['story' => $editorial[$category]])
+        @else
+            @include('home-cover')
+        @endif
     @endsection
 @endif
 
