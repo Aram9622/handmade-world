@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\ListingInteractionController;
 use App\Http\Controllers\SearchIndexController;
@@ -32,4 +33,11 @@ Route::middleware('auth')->group(function () {
     Route::put('/items/{listing}', [ListingController::class, 'update'])->can('update', 'listing')->middleware('throttle:10,1')->name('listings.update');
     Route::delete('/items/{listing}', [ListingController::class, 'destroy'])->can('delete', 'listing')->name('listings.destroy');
     Route::post('/logout', [AccountController::class, 'logout'])->name('logout');
+});
+
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'can:manage-marketplace'])->group(function () {
+    Route::get('/', [AdminController::class, 'index'])->name('index');
+    Route::patch('/users/{user}', [AdminController::class, 'account'])->name('users.update');
+    Route::patch('/listings/{listing}', [AdminController::class, 'listing'])->name('listings.update');
+    Route::patch('/comments/{comment}', [AdminController::class, 'comment'])->name('comments.update');
 });

@@ -16,6 +16,9 @@
         <nav aria-label="{{ __('Основная навигация') }}">
             <a class="nav-link" href="{{ route('catalog') }}#catalog">{{ __('Каталог') }}</a>
             @auth
+                @can('manage-marketplace')
+                    <a class="nav-link" href="{{ route('admin.index') }}">{{ __('Админка') }}</a>
+                @endcan
                 <a class="nav-link" href="{{ route('listings.mine') }}">{{ __('Мои изделия') }}</a>
                 <form action="{{ route('logout') }}" method="post">@csrf <button class="nav-link" type="submit">{{ __('Выйти') }}</button></form>
             @else
