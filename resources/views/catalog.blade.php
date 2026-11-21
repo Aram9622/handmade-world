@@ -61,9 +61,11 @@
     </div>
     <div class="grid">
         @forelse($listings as $listing)
-            <article class="card">
+            <article class="card" data-reveal>
                 <a href="{{ route('listings.show', $listing) }}">
-                    <img src="{{ route('listings.photo', $listing) }}" alt="{{ $listing->title }}" loading="lazy">
+                    <div class="card-photo">
+                        <img src="{{ route('listings.photo', $listing) }}" alt="{{ $listing->title }}" loading="lazy">
+                    </div>
                     <div class="card-copy">
                         <span>{{ __(\App\Models\Listing::CATEGORIES[$listing->category]) }}</span>
                         <h4>{{ $listing->title }}</h4>

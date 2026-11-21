@@ -10,9 +10,11 @@
     <h2>{{ __('Мои изделия') }}</h2>
     <div class="grid">
         @forelse($listings as $listing)
-            <article class="card">
+            <article class="card" data-reveal>
                 <a href="{{ route('listings.show', $listing) }}">
-                    <img src="{{ route('listings.photo', $listing) }}" alt="" loading="lazy">
+                    <div class="card-photo">
+                        <img src="{{ route('listings.photo', $listing) }}" alt="" loading="lazy">
+                    </div>
                     <div class="card-copy">
                         <h3>{{ $listing->title }}</h3>
                         <strong>@include('listing-price')</strong>
