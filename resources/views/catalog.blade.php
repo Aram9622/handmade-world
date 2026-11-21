@@ -23,6 +23,12 @@
     @endif
 @endpush
 
+@if($showEditorial && !$categoryName)
+    @section('cover')
+        @include('home-cover')
+    @endsection
+@endif
+
 @section('content')
 @if($showEditorial && $categoryName)
     @include('category-editorial', ['story' => $editorial[$category]])
