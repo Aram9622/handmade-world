@@ -204,5 +204,9 @@
     "Причина скрытия": "Reason for hiding",
     "Восстановить": "Restore",
     "Скрыть": "Hide",
-    "Объявление скрыто": "Listing hidden"
+    "Объявление скрыто": "Listing hidden",
+    "Меню": "Menu",
+    "Главная": "Home",
+    "Открыть витрину": "Open storefront",
+    "Найдено: :count": ":count results"
 }

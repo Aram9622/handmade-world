@@ -30,7 +30,13 @@ class AdminController extends Controller
 
         $records = $query->latest('id')->paginate(20)->withQueryString();
 
-        return view('admin.index', compact('records', 'section', 'search'));
+        $totals = [
+            'listings' => Listing::count(),
+            'comments' => ListingComment::count(),
+            'users' => User::count(),
+        ];
+
+        return view('admin.index', compact('records', 'section', 'search', 'totals'));
     }
 
     public function account(Request $request, User $user): RedirectResponse

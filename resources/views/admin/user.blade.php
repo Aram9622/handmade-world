@@ -1,7 +1,7 @@
 <div>
     <strong>{{ $user->name }}</strong>
     <p>{{ $user->email }}</p>
-    <p>{{ __($user->is_super_admin ? 'Суперадминистратор' : ($user->suspended_at ? 'Заблокирован' : 'Активен')) }}</p>
+    <span class="admin-state {{ $user->suspended_at ? 'admin-state-muted' : '' }}">{{ __($user->is_super_admin ? 'Суперадминистратор' : ($user->suspended_at ? 'Заблокирован' : 'Активен')) }}</span>
 </div>
 @unless($user->is_super_admin)
     <form action="{{ route('admin.users.update', $user) }}" method="post">
