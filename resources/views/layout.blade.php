@@ -23,6 +23,7 @@
     <div class="wrap">
         @yield('content')
     </div>
+    @yield('after-content')
 </main>
 <footer class="footer"><div class="wrap"><strong>Handmade Work</strong><span>{{ __('Площадка для мастеров и ценителей ручной работы') }}</span></div></footer>
 @show
