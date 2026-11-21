@@ -24,7 +24,7 @@
 <article class="detail">
     <img src="{{ route('listings.photo', $listing) }}" alt="{{ $listing->title }}">
     <div class="detail-copy">
-        <p class="category"><a class="text-link" href="{{ route('catalog', ['category' => $listing->category]) }}">{{ __(\App\Models\Listing::CATEGORIES[$listing->category]) }}</a></p>
+        <p class="category"><a class="text-link" href="{{ route('catalog', ['category' => $listing->category]) }}">{{ $categoryTitle }}</a></p>
         <h1>{{ $listing->title }}</h1>
         <p class="price">@include('listing-price')</p>
         <dl class="fulfillment">

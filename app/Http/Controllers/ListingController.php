@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\SaveListingRequest;
 use App\Models\Listing;
+use App\Services\EditorialContent;
 use App\Services\ListingService;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\Request;
@@ -18,7 +19,7 @@ class ListingController extends Controller
         private readonly FilesystemAdapter $photos,
     ) {}
 
-    public function index(Request $request)
+    public function index(Request $request, EditorialContent $content)
     {
         $filters = $request->validate([
             'q' => ['nullable', 'string', 'max:100'],
@@ -53,20 +54,23 @@ class ListingController extends Controller
         $listings = $query->latest('created_at')->latest('id')->paginate(12)->withQueryString();
         $showFeed = $search === '' && $category === '' && $sort === 'new';
 
-        return view('catalog', compact('listings', 'search', 'category', 'sort', 'showFeed'));
+        $editorial = $content->all(app()->getLocale());
+
+        return view('catalog', compact('editorial', 'listings', 'search', 'category', 'sort', 'showFeed'));
     }
 
-    public function show(Request $request, Listing $listing)
+    public function show(Request $request, Listing $listing, EditorialContent $editorial)
     {
         $this->ensureListingCanBeViewed($request, $listing);
 
+        $categoryTitle = $editorial->get($listing->category, app()->getLocale())['title'];
         $product = [
             '@context' => 'https://schema.org',
             '@type' => 'Product',
             'name' => $listing->title,
             'description' => $listing->description,
             'image' => [route('listings.photo', $listing)],
-            'category' => __(Listing::CATEGORIES[$listing->category]),
+            'category' => $categoryTitle,
             'offers' => [
                 '@type' => 'Offer',
                 'url' => route('listings.show', $listing),
@@ -82,7 +86,7 @@ class ListingController extends Controller
         $comments = $listing->comments()->whereNull('hidden_at')->with('author:id,name')->latest('id')->paginate(15, pageName: 'comments_page')
             ->fragment('comments');
 
-        return view('listing', compact('listing', 'product', 'liked', 'comments'));
+        return view('listing', compact('listing', 'product', 'liked', 'comments', 'categoryTitle'));
     }
 
     public function photo(Request $request, Listing $listing)
@@ -109,9 +113,14 @@ class ListingController extends Controller
         return view('my-listings', compact('listings'));
     }
 
-    public function edit(Listing $listing)
+    public function create(EditorialContent $editorial)
     {
-        return view('sell', compact('listing'));
+        return view('sell', ['listing' => null, 'categories' => $editorial->all(app()->getLocale())]);
+    }
+
+    public function edit(Listing $listing, EditorialContent $editorial)
+    {
+        return view('sell', ['listing' => $listing, 'categories' => $editorial->all(app()->getLocale())]);
     }
 
     public function store(SaveListingRequest $request)

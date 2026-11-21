@@ -11,18 +11,7 @@
     $sections = ['listings' => 'Объявления', 'comments' => 'Комментарии', 'users' => 'Пользователи'];
 @endphp
 <div class="admin-shell">
-    <aside class="admin-sidebar">
-        <a class="brand admin-brand" href="{{ route('admin.index') }}"><span aria-hidden="true">✿</span> Handmade <em>Work</em></a>
-        <nav class="admin-nav" aria-label="{{ __('Админка') }}">
-            @foreach($sections as $tab => $label)
-                <a href="{{ route('admin.index', ['section' => $tab]) }}" @if($tab === $section) aria-current="page" @endif>
-                    <span>{{ __($label) }}</span>
-                    <span class="admin-nav-count">{{ $totals[$tab] }}</span>
-                </a>
-            @endforeach
-        </nav>
-        <a class="admin-storefront" href="{{ route('catalog') }}">{{ __('Открыть витрину') }}</a>
-    </aside>
+    @include('admin.sidebar')
 
     <main class="admin-main">
         <header class="admin-header">

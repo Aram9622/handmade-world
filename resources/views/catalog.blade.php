@@ -1,14 +1,13 @@
 @extends('layout')
 
 @php
-    $categoryName = $category !== '' ? __(\App\Models\Listing::CATEGORIES[$category]) : null;
+    $categoryName = $category !== '' ? $editorial[$category]['title'] : null;
     $catalogTitle = match ($category) {
         '' => __('Изделия ручной работы'),
         'other' => __('Другие изделия ручной работы'),
         default => __(':category ручной работы', ['category' => $categoryName]),
     };
     $page = $listings->currentPage();
-    $editorial = config('category_editorial');
     $showEditorial = $search === '' && $sort === 'new' && $page === 1;
     $canonicalParameters = array_filter(['category' => $category, 'page' => $page > 1 ? $page : null]);
 @endphp
@@ -52,7 +51,7 @@
             <select name="category">
                 <option value="">{{ __('Все категории') }}</option>
                 @foreach(\App\Models\Listing::CATEGORIES as $key => $name)
-                    <option value="{{ $key }}" @selected($key === $category)>{{ __($name) }}</option>
+                    <option value="{{ $key }}" @selected($key === $category)>{{ $editorial[$key]['title'] }}</option>
                 @endforeach
             </select>
         </label>
@@ -77,7 +76,7 @@
                         <img src="{{ route('listings.photo', $listing) }}" alt="{{ $listing->title }}" loading="lazy">
                     </div>
                     <div class="card-copy">
-                        <span>{{ __(\App\Models\Listing::CATEGORIES[$listing->category]) }}</span>
+                        <span>{{ $editorial[$listing->category]['title'] }}</span>
                         <h4>{{ $listing->title }}</h4>
                         <strong>@include('listing-price')</strong>
                         @if($listing->city)

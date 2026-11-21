@@ -1,10 +1,10 @@
 <section class="hero editorial-hero full-cover home-cover">
     <div class="hero-copy">
-        <h1>{{ __('Сделано') }} <em>{{ __('руками.') }}</em></h1>
-        <p>{{ __('Картины, керамика и вещи для дома от независимых мастеров.') }}</p>
-        <a class="button" href="#catalog-results">{{ __('Смотреть новинки') }}</a>
+        <h1>{{ $editorial['home']['title'] }} <em>{{ $editorial['home']['heading'] }}</em></h1>
+        <p>{{ $editorial['home']['intro'] }}</p>
+        <a class="button" href="#catalog-results">{{ $editorial['home']['cta'] }}</a>
     </div>
     <div class="cover-art">
-        <img class="editorial-image" src="{{ asset('images/editorial/home.webp') }}" alt="{{ __('Коллаж с руками мастера, работающего с глиной') }}" fetchpriority="high">
+        <img class="editorial-image" src="{{ $editorial['home']['cover_url'] }}" alt="{{ $editorial['home']['alt'] }}" fetchpriority="high">
     </div>
 </section>
