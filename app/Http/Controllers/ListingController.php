@@ -29,7 +29,7 @@ class ListingController extends Controller
         $search = trim($filters['q'] ?? '');
         $category = $filters['category'] ?? '';
         $sort = $filters['sort'] ?? 'new';
-        $query = Listing::query();
+        $query = Listing::visible();
 
         if ($search !== '') {
             $escapedSearch = str_replace(['!', '%', '_'], ['!!', '!%', '!_'], mb_strtolower($search));
@@ -58,6 +58,8 @@ class ListingController extends Controller
 
     public function show(Request $request, Listing $listing)
     {
+        $this->ensureListingCanBeViewed($request, $listing);
+
         $product = [
             '@context' => 'https://schema.org',
             '@type' => 'Product',
@@ -77,20 +79,27 @@ class ListingController extends Controller
         $listing->loadCount('likes');
         $user = $request->user();
         $liked = $user && $listing->likes()->whereKey($user->id)->exists();
-        $comments = $listing->comments()->with('author:id,name')->latest('id')->paginate(15, pageName: 'comments_page')
+        $comments = $listing->comments()->whereNull('hidden_at')->with('author:id,name')->latest('id')->paginate(15, pageName: 'comments_page')
             ->fragment('comments');
 
         return view('listing', compact('listing', 'product', 'liked', 'comments'));
     }
 
-    public function photo(Listing $listing)
+    public function photo(Request $request, Listing $listing)
     {
+        $this->ensureListingCanBeViewed($request, $listing);
         abort_unless($this->photos->exists($listing->photo_path), 404);
 
         return $this->photos->response($listing->photo_path, null, [
             'Cache-Control' => 'no-cache',
             'X-Content-Type-Options' => 'nosniff',
         ]);
+    }
+
+    private function ensureListingCanBeViewed(Request $request, Listing $listing): void
+    {
+        $user = $request->user();
+        abort_if($listing->hidden_at !== null && ! $user?->is_super_admin && $user?->id !== $listing->user_id, 404);
     }
 
     public function mine(Request $request)

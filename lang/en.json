@@ -188,5 +188,21 @@
     "Ваш комментарий": "Your comment",
     "Оставить комментарий": "Post comment",
     "Войти, чтобы оставить комментарий": "Sign in to leave a comment",
-    "Комментариев пока нет.": "No comments yet."
+    "Комментариев пока нет.": "No comments yet.",
+    "Админка": "Admin",
+    "Управление площадкой": "Marketplace administration",
+    "Пользователи": "Users",
+    "Объявления": "Listings",
+    "Ничего не найдено.": "No results found.",
+    "Суперадминистратор": "Super administrator",
+    "Заблокирован": "Suspended",
+    "Активен": "Active",
+    "Разблокировать": "Restore account",
+    "Заблокировать": "Suspend account",
+    "Скрыто": "Hidden",
+    "Опубликовано": "Published",
+    "Причина скрытия": "Reason for hiding",
+    "Восстановить": "Restore",
+    "Скрыть": "Hide",
+    "Объявление скрыто": "Listing hidden"
 }

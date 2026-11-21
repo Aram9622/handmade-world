@@ -18,6 +18,10 @@
                     <div class="card-copy">
                         <h3>{{ $listing->title }}</h3>
                         <strong>@include('listing-price')</strong>
+                        @if($listing->hidden_at)
+                            <p>{{ __('Объявление скрыто') }}</p>
+                            @if($listing->moderation_reason)<p>{{ $listing->moderation_reason }}</p>@endif
+                        @endif
                     </div>
                 </a>
                 <div class="card-actions">

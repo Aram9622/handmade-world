@@ -27,14 +27,14 @@ class SearchIndexController extends Controller
 
             $this->writeUrl($xml, route('catalog'));
 
-            $categories = Listing::query()->distinct()->pluck('category');
+            $categories = Listing::visible()->distinct()->pluck('category');
             foreach ($categories as $category) {
                 if (isset(Listing::CATEGORIES[$category])) {
                     $this->writeUrl($xml, route('catalog', ['category' => $category]));
                 }
             }
 
-            foreach (Listing::query()->select(['id', 'updated_at'])->lazyById() as $listing) {
+            foreach (Listing::visible()->select(['id', 'updated_at'])->lazyById() as $listing) {
                 $this->writeUrl($xml, route('listings.show', $listing), $listing->updated_at?->toAtomString());
             }
 

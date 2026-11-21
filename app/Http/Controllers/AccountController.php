@@ -30,13 +30,13 @@ class AccountController extends Controller
             'password' => ['required', 'string', 'max:72'],
         ]);
 
-        if (! Auth::attempt($credentials)) {
+        if (! Auth::attempt([...$credentials, 'suspended_at' => null])) {
             return back()->withErrors(['email' => __('Проверьте почту и пароль.')])->onlyInput('email');
         }
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('catalog'));
+        return redirect()->intended(route($request->user()->is_super_admin ? 'admin.index' : 'catalog'));
     }
 
     public function logout(Request $request): RedirectResponse
