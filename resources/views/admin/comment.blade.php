@@ -1,6 +1,6 @@
 <div>
     <a class="text-link" href="{{ route('listings.show', $comment->listing) }}#comments">{{ $comment->listing->title }}</a>
-    <p>{{ $comment->author->name }} · {{ $comment->hidden_at ? __('Скрыто') : __('Опубликовано') }}</p>
+    <p>{{ $comment->author->name }} <span class="admin-state {{ $comment->hidden_at ? 'admin-state-muted' : '' }}">{{ $comment->hidden_at ? __('Скрыто') : __('Опубликовано') }}</span></p>
     <p class="description">{{ $comment->body }}</p>
 </div>
 <form action="{{ route('admin.comments.update', $comment) }}" method="post">

@@ -3,39 +3,83 @@
 
 @push('metadata')
     <meta name="robots" content="noindex">
+    <link rel="stylesheet" href="{{ asset('admin.css') }}">
 @endpush
 
-@section('content')
-<section class="catalog admin-page">
-    <h1 class="catalog-title">{{ __('Управление площадкой') }}</h1>
-    <nav class="category-nav" aria-label="{{ __('Админка') }}">
-        @foreach(['listings' => 'Объявления', 'comments' => 'Комментарии', 'users' => 'Пользователи'] as $tab => $label)
-            <a class="text-link" href="{{ route('admin.index', ['section' => $tab]) }}" @if($tab === $section) aria-current="page" @endif>{{ __($label) }}</a>
-        @endforeach
-    </nav>
+@section('body')
+@php
+    $sections = ['listings' => 'Объявления', 'comments' => 'Комментарии', 'users' => 'Пользователи'];
+@endphp
+<div class="admin-shell">
+    <aside class="admin-sidebar">
+        <a class="brand admin-brand" href="{{ route('admin.index') }}"><span aria-hidden="true">✿</span> Handmade <em>Work</em></a>
+        <nav class="admin-nav" aria-label="{{ __('Админка') }}">
+            @foreach($sections as $tab => $label)
+                <a href="{{ route('admin.index', ['section' => $tab]) }}" @if($tab === $section) aria-current="page" @endif>
+                    <span>{{ __($label) }}</span>
+                    <span class="admin-nav-count">{{ $totals[$tab] }}</span>
+                </a>
+            @endforeach
+        </nav>
+        <a class="admin-storefront" href="{{ route('catalog') }}">{{ __('Открыть витрину') }}</a>
+    </aside>
 
-    <form class="admin-search" action="{{ route('admin.index') }}" method="get">
-        <input type="hidden" name="section" value="{{ $section }}">
-        <label>{{ __('Поиск') }}<input name="q" value="{{ $search }}" maxlength="100"></label>
-        <button class="button" type="submit">{{ __('Найти') }}</button>
-    </form>
-    @include('errors')
+    <main class="admin-main">
+        <header class="admin-header">
+            <h1>{{ __('Управление площадкой') }}</h1>
+            <div class="admin-header-tools">
+                @include('language-menu')
+                <details class="header-menu">
+                    <summary class="header-control admin-account">{{ auth()->user()->name }}</summary>
+                    <div class="header-popover">
+                        <form action="{{ route('logout') }}" method="post">@csrf <button type="submit">{{ __('Выйти') }}</button></form>
+                    </div>
+                </details>
+            </div>
+        </header>
 
-    <ul class="admin-records">
-        @forelse($records as $record)
-            <li class="admin-record">
-                @if($section === 'users')
-                    @include('admin.user', ['user' => $record])
-                @elseif($section === 'listings')
-                    @include('admin.listing', ['listing' => $record])
-                @else
-                    @include('admin.comment', ['comment' => $record])
-                @endif
-            </li>
-        @empty
-            <li>{{ __('Ничего не найдено.') }}</li>
-        @endforelse
-    </ul>
-    @include('listing-pagination', ['listings' => $records])
-</section>
+        <dl class="admin-totals">
+            @foreach($sections as $tab => $label)
+                <div><dt>{{ __($label) }}</dt><dd>{{ $totals[$tab] }}</dd></div>
+            @endforeach
+        </dl>
+
+        @if(session('status'))
+            <p class="notice" role="status">{{ session('status') }}</p>
+        @endif
+
+        <section class="admin-panel" aria-labelledby="admin-section-title">
+            <header class="admin-panel-header">
+                <div>
+                    <h2 id="admin-section-title">{{ __($sections[$section]) }}</h2>
+                    <p>{{ __('Найдено: :count', ['count' => $records->total()]) }}</p>
+                </div>
+                <form class="admin-search" action="{{ route('admin.index') }}" method="get">
+                    <input type="hidden" name="section" value="{{ $section }}">
+                    <input name="q" value="{{ $search }}" maxlength="100" aria-label="{{ __('Поиск') }}" placeholder="{{ __('Поиск') }}">
+                    <button class="button small" type="submit">{{ __('Найти') }}</button>
+                </form>
+            </header>
+            @include('errors')
+
+            <ul class="admin-records">
+                @forelse($records as $record)
+                    <li class="admin-record">
+                        @if($section === 'users')
+                            @include('admin.user', ['user' => $record])
+                        @elseif($section === 'listings')
+                            @include('admin.listing', ['listing' => $record])
+                        @else
+                            @include('admin.comment', ['comment' => $record])
+                        @endif
+                    </li>
+                @empty
+                    <li class="admin-empty">{{ __('Ничего не найдено.') }}</li>
+                @endforelse
+            </ul>
+
+            @include('listing-pagination', ['listings' => $records])
+        </section>
+    </main>
+</div>
 @endsection
