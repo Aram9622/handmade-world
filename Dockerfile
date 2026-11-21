@@ -5,6 +5,7 @@ COPY --from=composer /usr/bin/composer /usr/local/bin/composer
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends git unzip \
+    && docker-php-ext-install pdo_mysql \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

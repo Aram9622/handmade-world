@@ -10,9 +10,11 @@
 docker compose up --build -d
 ```
 
-Откройте http://localhost:8000. При первом запуске контейнер создаёт ключ приложения и SQLite-базу, затем применяет миграции. База и фотографии хранятся в томе `handmade-data` и сохраняются после `docker compose down`. После изменения исходников повторите команду запуска со сборкой.
+Откройте http://localhost:8000. При первом запуске Compose поднимает MySQL 8.4. Laravel ждёт готовности базы, создаёт ключ приложения и применяет миграции. База хранится в томе `handmade-mysql`, фотографии и ключ — в `handmade-data`. Данные сохраняются после `docker compose down`. Если ранее использовалась SQLite, её данные в MySQL автоматически не переносятся. После изменения исходников повторите команду запуска со сборкой.
 
 Если порт 8000 занят, выполните `HANDMADE_PORT=8080 docker compose up --build -d` и откройте http://localhost:8080. Для проверки логов используйте `docker compose logs app`, для запуска тестов — `docker compose exec app php artisan test --do-not-cache-result`.
+
+MySQL доступен внутри сети Compose. Перед первым запуском можно задать `HANDMADE_DB_PASSWORD` и `HANDMADE_DB_ROOT_PASSWORD` в локальном файле `.env`. Тесты используют отдельную SQLite-базу в памяти.
 
 ## Локальный запуск без Docker
 

@@ -10,14 +10,16 @@ return new class extends Migration
     {
         Schema::create('listing_likes', function (Blueprint $table) {
             $table->foreignId('listing_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete()->index();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->index('user_id');
             $table->primary(['listing_id', 'user_id']);
         });
 
         Schema::create('listing_comments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('listing_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete()->index();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->index('user_id');
             $table->text('body');
             $table->timestamps();
             $table->index(['listing_id', 'id']);

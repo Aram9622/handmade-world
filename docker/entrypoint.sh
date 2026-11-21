@@ -18,8 +18,6 @@ APP_NAME="Handmade Work"
 APP_ENV=local
 APP_DEBUG=true
 APP_KEY=$key
-DB_CONNECTION=sqlite
-DB_DATABASE=$data_dir/database.sqlite
 ENV
 
     # Keep the first complete configuration if two instances start together.
@@ -30,6 +28,5 @@ ENV
     trap - EXIT
 fi
 
-touch "$data_dir/database.sqlite"
 CACHE_STORE=file php artisan migrate --force --isolated=75
 exec "$@"
