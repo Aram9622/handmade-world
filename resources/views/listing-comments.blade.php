@@ -17,7 +17,7 @@
     @endauth
 
     @forelse($comments as $comment)
-        <article class="listing-comment">
+        <article class="listing-comment" data-reveal>
             <div class="comment-meta">
                 <strong>{{ $comment->author->name }}</strong>
                 <time datetime="{{ $comment->created_at->toAtomString() }}">{{ $comment->created_at->locale(app()->getLocale())->isoFormat('LL') }}</time>

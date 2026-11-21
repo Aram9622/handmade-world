@@ -173,3 +173,36 @@ small{font-weight:400;color:var(--muted);font-size:.88rem}
 .comment-meta{display:flex;gap:.5rem 1rem;flex-wrap:wrap;overflow-wrap:anywhere}
 .comment-meta time{color:var(--muted);font-size:.875rem}
 .listing-comment p{white-space:pre-wrap;overflow-wrap:anywhere;margin:.45rem 0 0}
+
+.card-photo{overflow:hidden}
+
+@media(prefers-reduced-motion:no-preference){
+ .editorial-hero .hero-copy,.detail-copy{animation:market-rise 620ms cubic-bezier(.2,.7,.2,1) backwards}
+ .editorial-image{animation:market-fade 780ms ease-out backwards}
+ .motion-enter{animation:market-rise 560ms cubic-bezier(.2,.7,.2,1) backwards}
+ .motion-enter:nth-child(3n+2){animation-delay:65ms}
+ .motion-enter:nth-child(3n){animation-delay:130ms}
+ .motion-enter:focus-within{animation:none}
+ .button{transition:background-color 180ms ease,border-color 180ms ease,box-shadow 180ms ease}
+ .button:active{scale:.98}
+ .card,.category-tile{transition:border-color 220ms ease,box-shadow 260ms ease}
+ .category-tile span{transition:background-color 220ms ease}
+ .card-photo img,.category-tile img{transition:transform 620ms cubic-bezier(.2,.7,.2,1)}
+ .card:focus-within,.category-tile:focus-visible{box-shadow:0 7px 24px #38251b20}
+}
+
+@media(prefers-reduced-motion:no-preference) and (hover:hover) and (pointer:fine){
+ .card:hover,.category-tile:hover{box-shadow:0 7px 24px #38251b20}
+ .card-photo:hover img,.category-tile:hover img{transform:scale(1.065)}
+ .button:hover{box-shadow:0 4px 12px #38251b24}
+}
+
+@keyframes market-rise{
+ from{opacity:.25;translate:0 18px}
+ to{opacity:1;translate:0 0}
+}
+
+@keyframes market-fade{
+ from{opacity:.35}
+ to{opacity:1}
+}
