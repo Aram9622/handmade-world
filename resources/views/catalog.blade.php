@@ -2,20 +2,20 @@
 
 @php
     $categoryName = $category !== '' ? $editorial[$category]['title'] : null;
-    $catalogTitle = match ($category) {
+    $catalogTitle = $subscriptionFeed ? __('Мои подписки') : match ($category) {
         '' => __('Изделия ручной работы'),
         'other' => __('Другие изделия ручной работы'),
         default => __(':category ручной работы', ['category' => $categoryName]),
     };
     $page = $listings->currentPage();
-    $showEditorial = $search === '' && $sort === 'new' && $page === 1;
+    $showEditorial = !$subscriptionFeed && $search === '' && $sort === 'new' && $page === 1;
     $canonicalParameters = array_filter(['category' => $category, 'page' => $page > 1 ? $page : null]);
 @endphp
 @section('title', $catalogTitle.($page > 1 ? (' — '.__('страница :page', ['page' => $page])) : '').' | Handmade Work')
 @section('description', __(':catalog от независимых мастеров. Смотрите фотографии, сравнивайте цены и связывайтесь с продавцами напрямую.', ['catalog' => $catalogTitle]))
 
 @push('metadata')
-    @if($search !== '' || $sort !== 'new' || ($page > 1 && $listings->isEmpty()))
+    @if($subscriptionFeed || $search !== '' || $sort !== 'new' || ($page > 1 && $listings->isEmpty()))
         <meta name="robots" content="noindex, follow">
     @else
         <link rel="canonical" href="{{ route('catalog', $canonicalParameters) }}">
@@ -41,17 +41,30 @@
 
 <section id="catalog" class="catalog">
     @if(!$showEditorial)
-        <h1 class="catalog-title">{{ $categoryName ?? __('Каталог изделий') }}</h1>
+        <h1 class="catalog-title">{{ $subscriptionFeed ? $catalogTitle : ($categoryName ?? __('Каталог изделий')) }}</h1>
     @else
         <h2>{{ $categoryName ? __('Объявления мастеров') : __('Каталог изделий') }}</h2>
     @endif
-    <form class="filters" action="{{ route('catalog') }}#catalog" method="get">
+    @if($subscriptionFeed)
+        <nav class="category-nav" aria-label="{{ __('Мои подписки') }}">
+            <a class="text-link" href="{{ route('subscriptions.index') }}" @if($category === '') aria-current="page" @endif>{{ __('Все подписки') }}</a>
+            @foreach($subscribedCategories as $key)
+                <a class="text-link" href="{{ route('catalog', ['category' => $key]) }}#category-subscription">{{ $editorial[$key]['title'] }}</a>
+            @endforeach
+            <a class="text-link" href="{{ route('catalog') }}#category-heading">{{ __('Все категории') }}</a>
+        </nav>
+    @elseif(!$showEditorial && $categoryName)
+        @include('category-subscription')
+    @endif
+    <form class="filters" action="{{ route($subscriptionFeed ? 'subscriptions.index' : 'catalog') }}#catalog" method="get">
         <label>{{ __('Поиск') }}<input name="q" value="{{ $search }}" placeholder="{{ __('Например, керамическая чашка') }}" maxlength="100"></label>
         <label>{{ __('Категория') }}
             <select name="category">
                 <option value="">{{ __('Все категории') }}</option>
                 @foreach(\App\Models\Listing::CATEGORIES as $key => $name)
-                    <option value="{{ $key }}" @selected($key === $category)>{{ $editorial[$key]['title'] }}</option>
+                    @if(!$subscriptionFeed || in_array($key, $subscribedCategories, true))
+                        <option value="{{ $key }}" @selected($key === $category)>{{ $editorial[$key]['title'] }}</option>
+                    @endif
                 @endforeach
             </select>
         </label>
@@ -90,7 +103,13 @@
             </article>
         @empty
             <div class="empty">
-                @if($category && $search === '')
+                @if($subscriptionFeed && !$subscribedCategories)
+                    <p>{{ __('Подпишитесь на интересные категории, чтобы видеть новые изделия здесь.') }}</p>
+                    <a class="button outline" href="{{ route('catalog') }}#category-heading">{{ __('Все категории') }}</a>
+                @elseif($subscriptionFeed)
+                    <p>{{ __('В подписках пока нет изделий по этим фильтрам.') }}</p>
+                    <a class="button outline" href="{{ route('subscriptions.index') }}">{{ __('Сбросить фильтры') }}</a>
+                @elseif($category && $search === '')
                     <p>{{ __('В этом разделе пока нет объявлений.') }}</p>
                     <a class="button outline" href="{{ route('catalog') }}#catalog">{{ __('Смотреть весь каталог') }}</a>
                 @elseif($search)
