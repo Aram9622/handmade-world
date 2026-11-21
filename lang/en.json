@@ -229,5 +229,16 @@
     "Ссылка на оригинал": "Link to the original",
     "Сводка по площадке": "Marketplace overview",
     "Статус": "Status",
-    "Действия": "Actions"
+    "Действия": "Actions",
+    "Активные аккаунты": "Active accounts",
+    "Заблокированные аккаунты": "Suspended accounts",
+    "Суперадминистраторы": "Super administrators",
+    "Все статусы": "All statuses",
+    "Сначала старые": "Oldest first",
+    "Применить": "Apply",
+    "Активность за 7 дней": "Activity over 7 days",
+    "Новые объявления": "New listings",
+    "Новые комментарии": "New comments",
+    "Новые регистрации": "New registrations",
+    "Всего за период: :count": "Period total: :count"
 }
