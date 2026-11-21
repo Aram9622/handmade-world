@@ -22,6 +22,29 @@ class AdminTest extends TestCase
         $this->patch(route('admin.users.update', $user), ['suspended' => 1])->assertForbidden();
     }
 
+    public function test_the_console_can_reset_only_an_existing_admin_password(): void
+    {
+        $admin = User::factory()->create();
+        $admin->forceFill(['is_super_admin' => true, 'remember_token' => 'old-token'])->save();
+        $member = User::factory()->create();
+
+        $this->artisan('admin:reset-password', ['email' => $member->email])->assertFailed();
+
+        $this->artisan('admin:reset-password', ['email' => $admin->email])
+            ->expectsQuestion('New password', 'new-admin-password')
+            ->expectsQuestion('Confirm new password', 'not-the-same-password')
+            ->assertFailed();
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('password', $admin->refresh()->password));
+
+        $this->artisan('admin:reset-password', ['email' => $admin->email])
+            ->expectsQuestion('New password', 'new-admin-password')
+            ->expectsQuestion('Confirm new password', 'new-admin-password')
+            ->assertSuccessful();
+        $this->assertNull($admin->refresh()->remember_token);
+        $this->post(route('login'), ['email' => $admin->email, 'password' => 'new-admin-password'])
+            ->assertRedirect(route('admin.index'));
+    }
+
     public function test_admin_can_moderate_public_content_and_suspend_accounts(): void
     {
         $admin = User::factory()->create();

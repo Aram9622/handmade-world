@@ -50,3 +50,11 @@ docker compose exec app php artisan admin:grant admin@example.com
 ```
 
 Замените `admin@example.com` адресом зарегистрированного аккаунта. При запуске без Docker используйте `php artisan admin:grant admin@example.com`. Войдите в этот аккаунт и откройте `/admin`. В панели можно блокировать и разблокировать обычные аккаунты, а также скрывать и восстанавливать объявления и комментарии.
+
+Если пароль суперадминистратора забыт, выполните:
+
+```sh
+docker compose exec app php artisan admin:reset-password admin@example.com
+```
+
+Подставьте email суперадминистратора и дважды введите новый пароль в терминале. Ввод скрыт. Используйте не менее 12 символов. Затем войдите с новым паролем.
