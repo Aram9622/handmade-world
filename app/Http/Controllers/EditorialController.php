@@ -15,15 +15,17 @@ class EditorialController extends Controller
 {
     public function edit(EditorialContent $editorial, string $page = 'home', string $language = 'ru'): View
     {
-        $this->validateSelection($page, $language);
+        $this->validateSelection($editorial, $page, $language);
         $content = $editorial->get($page, $language);
 
-        return view('admin.editorial', compact('page', 'language', 'content'));
+        $pages = $editorial->pages(app()->getLocale());
+
+        return view('admin.editorial', compact('page', 'language', 'content', 'pages'));
     }
 
     public function update(Request $request, EditorialContent $editorial, string $page, string $language): RedirectResponse
     {
-        $this->validateSelection($page, $language);
+        $this->validateSelection($editorial, $page, $language);
         $imageRules = ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:5120'];
         $rules = [
             'title' => ['required', 'string', 'max:100'],
@@ -74,9 +76,9 @@ class EditorialController extends Controller
         return to_route('admin.editorial.edit', [$page, $language])->with('status', __('Изменения сохранены.'));
     }
 
-    public function image(string $page, string $language, string $slot): StreamedResponse
+    public function image(EditorialContent $editorial, string $page, string $language, string $slot): StreamedResponse
     {
-        $this->validateSelection($page, $language);
+        $this->validateSelection($editorial, $page, $language);
         $record = EditorialPage::where(['page' => $page, 'locale' => $language])->firstOrFail();
         $path = $record->images[$slot] ?? null;
         $disk = Storage::disk('local');
@@ -85,8 +87,8 @@ class EditorialController extends Controller
         return $disk->response($path, null, ['Cache-Control' => 'no-cache', 'X-Content-Type-Options' => 'nosniff']);
     }
 
-    private function validateSelection(string $page, string $language): void
+    private function validateSelection(EditorialContent $editorial, string $page, string $language): void
     {
-        abort_unless(isset(EditorialContent::PAGES[$page], SetLocale::LANGUAGES[$language]), 404);
+        abort_unless(isset(SetLocale::LANGUAGES[$language]) && isset($editorial->pages($language)[$page]), 404);
     }
 }

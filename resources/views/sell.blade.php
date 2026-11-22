@@ -16,7 +16,7 @@
         @endif
         <label>{{ __('Название') }}<input name="title" maxlength="100" value="{{ old('title', $listing?->title) }}" required></label>
         <label>{{ __('Категория') }}<select name="category" required><option value="">{{ __('Выберите категорию') }}</option>
-        @foreach(\App\Models\Listing::CATEGORIES as $key => $name)
+        @foreach(array_diff_key($categories, ['home' => true]) as $key => $name)
             <option value="{{ $key }}" @selected(old('category', $listing?->category) === $key)>{{ $categories[$key]['title'] }}</option>
         @endforeach
         </select></label>

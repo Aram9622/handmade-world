@@ -61,7 +61,7 @@
         <label>{{ __('Категория') }}
             <select name="category">
                 <option value="">{{ __('Все категории') }}</option>
-                @foreach(\App\Models\Listing::CATEGORIES as $key => $name)
+                @foreach(array_diff_key($editorial, ['home' => true]) as $key => $name)
                     @if(!$subscriptionFeed || in_array($key, $subscribedCategories, true))
                         <option value="{{ $key }}" @selected($key === $category)>{{ $editorial[$key]['title'] }}</option>
                     @endif
