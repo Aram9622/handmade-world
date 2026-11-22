@@ -11,16 +11,19 @@
     @method('PUT')
     <p>{{ __('В каждой части меню пункты с меньшим номером показываются первыми.') }}</p>
     @foreach($items->groupBy('area', preserveKeys: true) as $area => $group)
-        @php($heading = ['main' => 'Основная навигация', 'account' => 'Меню аккаунта', 'tools' => 'Кнопки в шапке'][$area])
+        @php($heading = ['main' => 'Основная навигация', 'account' => 'Меню аккаунта', 'tools' => 'Кнопки в шапке', 'categories' => 'Меню категорий'][$area])
         <section class="admin-panel">
             <h2>{{ __($heading) }}</h2>
+            @if($area === 'categories')
+                <p>{{ __('Пустая подпись использует название категории из редактора контента.') }}</p>
+            @endif
             @foreach($group as $key => $item)
                 <fieldset class="admin-menu-item">
                     <legend>{{ __($item['label']) }}</legend>
                     <div class="admin-menu-fields">
                         @foreach($languages as $locale => $language)
                             <label lang="{{ $locale }}">{{ $language }}
-                                <input name="items[{{ $key }}][labels][{{ $locale }}]" value="{{ old("items.$key.labels.$locale", $item['labels'][$locale]) }}" maxlength="80" required>
+                                <input name="items[{{ $key }}][labels][{{ $locale }}]" value="{{ old("items.$key.labels.$locale", $item['labels'][$locale]) }}" maxlength="80" @required(!isset($item['parameters']['category']))>
                             </label>
                         @endforeach
                         <label>{{ __('Порядок') }}
