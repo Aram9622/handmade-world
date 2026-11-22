@@ -254,5 +254,5 @@
     gap: 12px;
 }
 
-.admin-menu-actions { display: flex; align-items: end; flex-wrap: wrap; gap: 12px; }
-.admin-menu-remove { margin-top: 12px; }
+#category-menu { margin-top: 24px; }
+.admin-menu-create { margin-top: 12px; }

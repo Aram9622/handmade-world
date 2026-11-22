@@ -83,7 +83,7 @@ class StorefrontMenuTest extends TestCase
         $this->delete('/admin/menu/categories/category_ceramics')->assertRedirect($editPath);
         $this->get('/?category=paintings')->assertDontSee($link, false);
         $this->get('/?category=ceramics')->assertOk();
-        $this->get('/admin/menu')->assertSee('value="category_ceramics"', false)
+        $this->get('/admin/menu')->assertDontSee('value="category_ceramics"', false)
             ->assertDontSee('items[category_ceramics][position]', false);
 
         $this->post('/admin/menu/categories', ['item' => 'category_ceramics'])->assertRedirect($editPath);
@@ -113,7 +113,7 @@ class StorefrontMenuTest extends TestCase
         $this->postJson($path, $category)->assertUnprocessable()->assertJsonValidationErrors('slug');
         $this->postJson($path, [...$category, 'slug' => 'ceramics'])->assertUnprocessable()->assertJsonValidationErrors('slug');
         $this->get('/admin/content/wood-craft/ru')->assertOk()->assertSee('Изделия из дерева');
-        $this->get('/admin/menu')->assertOk()->assertSee('items[category_wood-craft][position]', false);
+        $this->get('/admin/menu')->assertOk()->assertSee('Новая категория')->assertDontSee('items[category_wood-craft][position]', false);
 
         $this->actingAs($member)->withSession(['locale' => 'en'])
             ->get('/?category=wood-craft')->assertOk()->assertSee('Wood crafts');

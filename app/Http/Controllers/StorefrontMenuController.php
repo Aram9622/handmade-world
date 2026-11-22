@@ -17,11 +17,8 @@ class StorefrontMenuController extends Controller
 {
     public function edit(StorefrontMenu $menu): View
     {
-        $items = $menu->items(includeRemoved: true);
-
         return view('admin.menu', [
-            'items' => $items->where('removed', false),
-            'availableCategories' => $items->where('area', 'categories')->where('removed', true),
+            'items' => $menu->items()->where('area', '!=', 'categories'),
             'languages' => SetLocale::LANGUAGES,
         ]);
     }
