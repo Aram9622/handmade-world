@@ -10,11 +10,24 @@
     @csrf
     @method('PUT')
     <p>{{ __('В каждой части меню пункты с меньшим номером показываются первыми.') }}</p>
-    @foreach($items->groupBy('area', preserveKeys: true) as $area => $group)
+    @php($groups = $items->groupBy('area', preserveKeys: true))
+    @foreach($groups->except('categories')->put('categories', $groups->get('categories', collect())) as $area => $group)
         @php($heading = ['main' => 'Основная навигация', 'account' => 'Меню аккаунта', 'tools' => 'Кнопки в шапке', 'categories' => 'Меню категорий'][$area])
-        <section class="admin-panel">
+        <section class="admin-panel" @if($area === 'categories') id="category-menu" @endif>
             <h2>{{ __($heading) }}</h2>
             @if($area === 'categories')
+                @if($availableCategories->isNotEmpty())
+                    <div class="admin-menu-actions">
+                        <label>{{ __('Категория') }}
+                            <select name="item" form="add-category-menu-item" required>
+                                @foreach($availableCategories as $key => $item)
+                                    <option value="{{ $key }}">{{ __($item['label']) }}</option>
+                                @endforeach
+                            </select>
+                        </label>
+                        <button class="button small" type="submit" form="add-category-menu-item">{{ __('Добавить пункт') }}</button>
+                    </div>
+                @endif
                 <p>{{ __('Пустая подпись использует название категории из редактора контента.') }}</p>
             @endif
             @foreach($group as $key => $item)
@@ -36,10 +49,21 @@
                             </select>
                         </label>
                     </div>
+                    @if($area === 'categories')
+                        <button class="button small outline admin-menu-remove" type="submit" form="remove-{{ $key }}">{{ __('Удалить пункт') }}</button>
+                    @endif
                 </fieldset>
             @endforeach
         </section>
     @endforeach
     <button class="button" type="submit">{{ __('Сохранить изменения') }}</button>
 </form>
+
+<form id="add-category-menu-item" method="post" action="{{ route('admin.menu.categories.store') }}">@csrf</form>
+@foreach($groups->get('categories', []) as $key => $item)
+    <form id="remove-{{ $key }}" method="post" action="{{ route('admin.menu.categories.destroy', ['item' => $key]) }}">
+        @csrf
+        @method('DELETE')
+    </form>
+@endforeach
 @endsection

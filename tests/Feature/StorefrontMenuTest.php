@@ -68,4 +68,28 @@ class StorefrontMenuTest extends TestCase
         $this->withSession(['locale' => 'ru'])->get('/?category=ceramics')
             ->assertSee('aria-current="page" >Изделия из глины</a>', false);
     }
+
+    public function test_category_menu_entries_can_be_removed_and_added_back(): void
+    {
+        $admin = User::factory()->create();
+        $admin->forceFill(['is_super_admin' => true])->save();
+        $link = 'href="'.route('catalog', ['category' => 'ceramics']).'"';
+        $editPath = '/admin/menu#category-menu';
+
+        $this->actingAs($admin)->get('/?category=paintings')->assertSee($link, false);
+        $this->delete('/admin/menu/categories/category_ceramics')->assertRedirect($editPath);
+        $this->get('/?category=paintings')->assertDontSee($link, false);
+        $this->get('/?category=ceramics')->assertOk();
+        $this->get('/admin/menu')->assertSee('value="category_ceramics"', false)
+            ->assertDontSee('items[category_ceramics][position]', false);
+
+        $this->post('/admin/menu/categories', ['item' => 'category_ceramics'])->assertRedirect($editPath);
+        $this->get('/?category=paintings')->assertSee($link, false);
+        $this->post('/admin/menu/categories', ['item' => 'category_ceramics'])->assertRedirect($editPath);
+        $this->assertDatabaseCount('storefront_menu_items', 1);
+
+        $this->postJson('/admin/menu/categories', ['item' => 'home'])->assertUnprocessable();
+        $this->actingAs(User::factory()->create())
+            ->delete('/admin/menu/categories/category_ceramics')->assertForbidden();
+    }
 }

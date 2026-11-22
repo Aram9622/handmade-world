@@ -55,6 +55,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'can:manage-marketpl
     Route::get('/', [AdminController::class, 'index'])->name('index');
     Route::get('/menu', [StorefrontMenuController::class, 'edit'])->name('menu.edit');
     Route::put('/menu', [StorefrontMenuController::class, 'update'])->name('menu.update');
+    Route::post('/menu/categories', [StorefrontMenuController::class, 'addCategory'])->name('menu.categories.store');
+    Route::delete('/menu/categories/{item}', [StorefrontMenuController::class, 'removeCategory'])
+        ->where('item', 'category_[a-z_]+')->name('menu.categories.destroy');
     Route::get('/content/{page?}/{language?}', [EditorialController::class, 'edit'])->name('editorial.edit');
     Route::put('/content/{page}/{language}', [EditorialController::class, 'update'])->name('editorial.update');
     Route::patch('/users/{user}', [AdminController::class, 'account'])->name('users.update');

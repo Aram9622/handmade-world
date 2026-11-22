@@ -263,5 +263,9 @@
     "Показывать": "Visible",
     "Скрывать": "Hidden",
     "Меню категорий": "Category menu",
-    "Пустая подпись использует название категории из редактора контента.": "Leave a label blank to use the category title from the content editor."
+    "Пустая подпись использует название категории из редактора контента.": "Leave a label blank to use the category title from the content editor.",
+    "Добавить пункт": "Add item",
+    "Удалить пункт": "Remove item",
+    "Пункт меню добавлен.": "Menu item added.",
+    "Пункт меню удалён.": "Menu item removed."
 }
