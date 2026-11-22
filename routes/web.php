@@ -7,6 +7,7 @@ use App\Http\Controllers\EditorialController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\ListingInteractionController;
 use App\Http\Controllers\SearchIndexController;
+use App\Http\Controllers\StorefrontMenuController;
 use App\Models\Listing;
 use Illuminate\Support\Facades\Route;
 
@@ -52,6 +53,8 @@ Route::middleware('auth')->group(function () {
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'can:manage-marketplace'])->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('index');
+    Route::get('/menu', [StorefrontMenuController::class, 'edit'])->name('menu.edit');
+    Route::put('/menu', [StorefrontMenuController::class, 'update'])->name('menu.update');
     Route::get('/content/{page?}/{language?}', [EditorialController::class, 'edit'])->name('editorial.edit');
     Route::put('/content/{page}/{language}', [EditorialController::class, 'update'])->name('editorial.update');
     Route::patch('/users/{user}', [AdminController::class, 'account'])->name('users.update');

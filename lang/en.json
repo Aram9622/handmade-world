@@ -253,5 +253,13 @@
     "Подписка оформлена.": "You are now following this category.",
     "Подписка отменена.": "You have unfollowed this category.",
     "Подпишитесь на интересные категории, чтобы видеть новые изделия здесь.": "Follow the categories you like to see new items here.",
-    "В подписках пока нет изделий по этим фильтрам.": "No items in your subscriptions match these filters yet."
+    "В подписках пока нет изделий по этим фильтрам.": "No items in your subscriptions match these filters yet.",
+    "Меню витрины": "Storefront menu",
+    "Меню аккаунта": "Account menu",
+    "Кнопки в шапке": "Header buttons",
+    "В каждой части меню пункты с меньшим номером показываются первыми.": "Items with lower numbers appear first within each section of the menu.",
+    "Порядок": "Order",
+    "Видимость": "Visibility",
+    "Показывать": "Visible",
+    "Скрывать": "Hidden"
 }
