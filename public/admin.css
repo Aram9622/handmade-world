@@ -239,3 +239,17 @@
     .activity-days time { font-size: .75rem; }
     .activity-track { height: 62px; }
 }
+
+.admin-menu-item {
+    min-width: 0;
+    margin: 1rem 0;
+    padding: 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+}
+.admin-menu-item legend { padding-inline: 6px; font-weight: 650; }
+.admin-menu-fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+    gap: 12px;
+}

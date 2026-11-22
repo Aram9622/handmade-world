@@ -1,6 +1,3 @@
-<a href="{{ route('catalog') }}">{{ __('Главная') }}</a>
-<a href="{{ route('catalog') }}#category-heading">{{ __('Категории каталога') }}</a>
-<a href="{{ route('catalog') }}#catalog">{{ __('Каталог') }}</a>
-@auth
-    <a href="{{ route('subscriptions.index') }}">{{ __('Мои подписки') }}</a>
-@endauth
+@foreach($storefrontMenu->get('main', []) as $item)
+    <a href="{{ $item['href'] }}">{{ $item['text'] }}</a>
+@endforeach
