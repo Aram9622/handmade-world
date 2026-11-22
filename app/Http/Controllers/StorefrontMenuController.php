@@ -3,10 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Middleware\SetLocale;
+use App\Models\Listing;
+use App\Services\CatalogCategories;
 use App\Services\StorefrontMenu;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class StorefrontMenuController extends Controller
@@ -24,7 +28,7 @@ class StorefrontMenuController extends Controller
 
     public function update(Request $request, StorefrontMenu $menu): RedirectResponse
     {
-        $definitions = config('storefront_menu');
+        $definitions = $menu->definitions();
         $keys = implode(',', array_keys($definitions));
         $required = collect($definitions)->where('area', '!=', 'categories')->keys()->implode(',');
         $languages = implode(',', array_keys(SetLocale::LANGUAGES));
@@ -45,9 +49,31 @@ class StorefrontMenuController extends Controller
         return to_route('admin.menu.edit')->with('status', __('Изменения сохранены.'));
     }
 
+    public function createCategory(Request $request, CatalogCategories $categories): RedirectResponse
+    {
+        $locales = implode(',', array_keys(SetLocale::LANGUAGES));
+        $data = $request->validate([
+            'slug' => [
+                'required', 'string', 'max:23', 'regex:/^[a-z][a-z0-9-]*$/D',
+                Rule::notIn(['home', 'all', ...array_keys(Listing::CATEGORIES)]),
+                Rule::unique('catalog_categories', 'slug'),
+            ],
+            'names' => ['required', "array:$locales", "required_array_keys:$locales"],
+            'names.*' => ['required', 'string', 'max:80'],
+        ]);
+
+        try {
+            $categories->create($data['slug'], $data['names']);
+        } catch (UniqueConstraintViolationException) {
+            throw ValidationException::withMessages(['slug' => __('validation.unique', ['attribute' => __('Адрес категории')])]);
+        }
+
+        return to_route('admin.menu.edit')->withFragment('category-menu')->with('status', __('Категория создана.'));
+    }
+
     public function addCategory(Request $request, StorefrontMenu $menu): RedirectResponse
     {
-        $categories = collect(config('storefront_menu'))->where('area', 'categories')->keys()->all();
+        $categories = collect($menu->definitions())->where('area', 'categories')->keys()->all();
         $data = $request->validate(['item' => ['required', 'string', Rule::in($categories)]]);
         $menu->setCategoryRemoved($data['item'], false);
 
@@ -56,7 +82,7 @@ class StorefrontMenuController extends Controller
 
     public function removeCategory(string $item, StorefrontMenu $menu): RedirectResponse
     {
-        abort_unless(config("storefront_menu.$item.area") === 'categories', 404);
+        abort_unless(($menu->definitions()[$item]['area'] ?? null) === 'categories', 404);
         $menu->setCategoryRemoved($item, true);
 
         return to_route('admin.menu.edit')->withFragment('category-menu')->with('status', __('Пункт меню удалён.'));

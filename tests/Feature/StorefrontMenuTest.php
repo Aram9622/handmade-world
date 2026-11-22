@@ -3,8 +3,11 @@
 namespace Tests\Feature;
 
 use App\Models\EditorialPage;
+use App\Models\Listing;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class StorefrontMenuTest extends TestCase
@@ -91,5 +94,46 @@ class StorefrontMenuTest extends TestCase
         $this->postJson('/admin/menu/categories', ['item' => 'home'])->assertUnprocessable();
         $this->actingAs(User::factory()->create())
             ->delete('/admin/menu/categories/category_ceramics')->assertForbidden();
+    }
+
+    public function test_super_admin_can_create_a_new_catalog_category(): void
+    {
+        Storage::fake('local');
+        $admin = User::factory()->create();
+        $admin->forceFill(['is_super_admin' => true])->save();
+        $member = User::factory()->create();
+        $path = '/admin/menu/categories/create';
+        $category = [
+            'slug' => 'wood-craft',
+            'names' => ['ru' => 'Изделия из дерева', 'hy' => 'Փայտե իրեր', 'en' => 'Wood crafts'],
+        ];
+
+        $this->actingAs($member)->post($path, $category)->assertForbidden();
+        $this->actingAs($admin)->post($path, $category)->assertRedirect('/admin/menu#category-menu');
+        $this->postJson($path, $category)->assertUnprocessable()->assertJsonValidationErrors('slug');
+        $this->postJson($path, [...$category, 'slug' => 'ceramics'])->assertUnprocessable()->assertJsonValidationErrors('slug');
+        $this->get('/admin/content/wood-craft/ru')->assertOk()->assertSee('Изделия из дерева');
+        $this->get('/admin/menu')->assertOk()->assertSee('items[category_wood-craft][position]', false);
+
+        $this->actingAs($member)->withSession(['locale' => 'en'])
+            ->get('/?category=wood-craft')->assertOk()->assertSee('Wood crafts');
+        $this->get('/sell')->assertOk()->assertSee('value="wood-craft"', false);
+        $this->post('/items', [
+            'title' => 'Carved tray',
+            'category' => 'wood-craft',
+            'price' => 1500,
+            'description' => 'Hand-carved wooden tray.',
+            'contact_email' => 'maker@example.com',
+            'photo' => new UploadedFile(public_path('images/workshop.webp'), 'workshop.webp', 'image/webp', null, true),
+        ])->assertRedirect();
+        $this->assertDatabaseHas('listings', ['category' => 'wood-craft', 'title' => 'Carved tray']);
+        $viewer = User::factory()->create();
+        $this->actingAs($viewer)->put('/categories/wood-craft/subscription')->assertRedirect();
+        $this->get('/subscriptions')->assertOk()->assertSee('Carved tray');
+        $this->get('/items/'.Listing::sole()->id)->assertOk()->assertSee('Wood crafts');
+        $this->assertStringContainsString(
+            '?category=wood-craft',
+            $this->get('/sitemap.xml')->assertOk()->streamedContent(),
+        );
     }
 }

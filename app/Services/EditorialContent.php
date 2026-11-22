@@ -11,15 +11,20 @@ use Throwable;
 
 class EditorialContent
 {
-    public const PAGES = ['home' => 'Главная', ...Listing::CATEGORIES];
+    public function __construct(private readonly CatalogCategories $categories) {}
+
+    public function pages(string $locale): array
+    {
+        return ['home' => __('Главная', locale: $locale)] + $this->categories->names($locale);
+    }
 
     public function all(string $locale): array
     {
         $savedPages = EditorialPage::where('locale', $locale)->get()->keyBy('page');
 
         $content = [];
-        foreach (array_keys(self::PAGES) as $page) {
-            $content[$page] = $this->resolve($page, $locale, $savedPages->get($page));
+        foreach ($this->pages($locale) as $page => $title) {
+            $content[$page] = $this->resolve($page, $locale, $title, $savedPages->get($page));
         }
 
         return $content;
@@ -27,7 +32,7 @@ class EditorialContent
 
     public function get(string $page, string $locale): array
     {
-        return $this->resolve($page, $locale, EditorialPage::where(['page' => $page, 'locale' => $locale])->first());
+        return $this->resolve($page, $locale, $this->pages($locale)[$page], EditorialPage::where(['page' => $page, 'locale' => $locale])->first());
     }
 
     public function save(string $page, string $locale, array $content, array $uploads): void
@@ -63,11 +68,11 @@ class EditorialContent
         $disk->delete(array_values($oldImages));
     }
 
-    private function resolve(string $page, string $locale, ?EditorialPage $record): array
+    private function resolve(string $page, string $locale, string $title, ?EditorialPage $record): array
     {
         $translate = fn (string $value) => __($value, locale: $locale);
         $content = [
-            'title' => $translate(self::PAGES[$page]),
+            'title' => $title,
             'heading' => '',
             'intro' => '',
             'cta' => '',
@@ -87,17 +92,17 @@ class EditorialContent
                 'directory_title' => $translate('Ремёсла и искусство'),
             ]);
         } else {
-            $story = config("category_editorial.$page");
+            $story = config("category_editorial.$page", []);
             $content = array_replace($content, [
-                'heading' => $translate($story['heading']),
-                'intro' => $translate($story['intro']),
+                'heading' => $translate($story['heading'] ?? ''),
+                'intro' => $translate($story['intro'] ?? 'Объявления мастеров'),
                 'cta' => $translate('К объявлениям'),
-                'alt' => $translate($story['alt']),
+                'alt' => isset($story['alt']) ? $translate($story['alt']) : $title,
                 'history_title' => $translate('История раздела'),
                 'gallery_title' => $translate('По мотивам известных работ'),
                 'timeline' => array_map(
                     fn (array $entry) => array_combine(['period', 'title', 'description'], array_map($translate, $entry)),
-                    $story['timeline'],
+                    $story['timeline'] ?? [],
                 ),
                 'works' => array_map(
                     fn (array $work) => ['title' => $translate($work[1]), 'museum' => $translate($work[2]), 'url' => $work[3]],
@@ -107,7 +112,7 @@ class EditorialContent
         }
 
         $content = array_replace($content, $record?->content ?? []);
-        $content['cover_url'] = $this->imageUrl($page, $locale, 'cover', $record, "$page.webp");
+        $content['cover_url'] = $this->imageUrl($page, $locale, 'cover', $record, $page === 'home' || isset(Listing::CATEGORIES[$page]) ? "$page.webp" : 'other.webp');
 
         foreach ($content['works'] as $index => &$work) {
             $work['image_url'] = $this->imageUrl($page, $locale, "work-$index", $record, $story['works'][$index][0] ?? null);

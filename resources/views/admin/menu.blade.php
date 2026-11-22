@@ -16,6 +16,20 @@
         <section class="admin-panel" @if($area === 'categories') id="category-menu" @endif>
             <h2>{{ __($heading) }}</h2>
             @if($area === 'categories')
+                <fieldset class="admin-menu-item">
+                    <legend>{{ __('Новая категория') }}</legend>
+                    <div class="admin-menu-fields">
+                        @foreach($languages as $locale => $language)
+                            <label lang="{{ $locale }}">{{ $language }}
+                                <input form="create-catalog-category" name="names[{{ $locale }}]" value="{{ old("names.$locale") }}" maxlength="80" required>
+                            </label>
+                        @endforeach
+                        <label>{{ __('Адрес категории') }}
+                            <input form="create-catalog-category" name="slug" value="{{ old('slug') }}" placeholder="woodworking" maxlength="23" pattern="[a-z][a-z0-9\-]*" required>
+                        </label>
+                    </div>
+                    <button class="button small admin-menu-remove" type="submit" form="create-catalog-category">{{ __('Создать категорию') }}</button>
+                </fieldset>
                 @if($availableCategories->isNotEmpty())
                     <div class="admin-menu-actions">
                         <label>{{ __('Категория') }}
@@ -59,6 +73,7 @@
     <button class="button" type="submit">{{ __('Сохранить изменения') }}</button>
 </form>
 
+<form id="create-catalog-category" method="post" action="{{ route('admin.menu.categories.create') }}">@csrf</form>
 <form id="add-category-menu-item" method="post" action="{{ route('admin.menu.categories.store') }}">@csrf</form>
 @foreach($groups->get('categories', []) as $key => $item)
     <form id="remove-{{ $key }}" method="post" action="{{ route('admin.menu.categories.destroy', ['item' => $key]) }}">

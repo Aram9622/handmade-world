@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Listing;
+use App\Services\CatalogCategories;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -20,11 +21,11 @@ class SaveListingRequest extends FormRequest
         }
     }
 
-    public function rules(): array
+    public function rules(CatalogCategories $categories): array
     {
         return [
             'title' => ['required', 'string', 'max:100'],
-            'category' => ['required', Rule::in(array_keys(Listing::CATEGORIES))],
+            'category' => ['required', Rule::in($categories->keys())],
             'description' => ['required', 'string', 'max:2000'],
             'price' => ['required', 'integer', 'min:1', 'max:10000000'],
             'discount_percent' => ['sometimes', 'required', 'integer', 'min:0', 'max:99'],

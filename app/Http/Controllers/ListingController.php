@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\SaveListingRequest;
 use App\Models\Listing;
+use App\Services\CatalogCategories;
 use App\Services\CategorySubscriptions;
 use App\Services\EditorialContent;
 use App\Services\ListingService;
@@ -20,11 +21,11 @@ class ListingController extends Controller
         private readonly FilesystemAdapter $photos,
     ) {}
 
-    public function index(Request $request, EditorialContent $content, CategorySubscriptions $subscriptions)
+    public function index(Request $request, EditorialContent $content, CategorySubscriptions $subscriptions, CatalogCategories $categories)
     {
         $filters = $request->validate([
             'q' => ['nullable', 'string', 'max:100'],
-            'category' => ['nullable', Rule::in(array_keys(Listing::CATEGORIES))],
+            'category' => ['nullable', Rule::in($categories->keys())],
             'sort' => ['nullable', Rule::in(['new', 'low', 'high'])],
         ]);
 

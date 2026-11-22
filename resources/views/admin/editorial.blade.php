@@ -5,7 +5,6 @@
 
 @section('admin-content')
 @php
-    $pages = \App\Services\EditorialContent::PAGES;
     $languages = \App\Http\Middleware\SetLocale::LANGUAGES;
     $fields = [
         'title' => ['Название', 100],
@@ -19,7 +18,7 @@
 @endphp
     <nav class="admin-editor-tabs" aria-label="{{ __('Страницы витрины') }}">
         @foreach($pages as $key => $label)
-            <a class="text-link" href="{{ route('admin.editorial.edit', [$key, $language]) }}" @if($page === $key) aria-current="page" @endif>{{ __($label) }}</a>
+            <a class="text-link" href="{{ route('admin.editorial.edit', [$key, $language]) }}" @if($page === $key) aria-current="page" @endif>{{ $label }}</a>
         @endforeach
     </nav>
     <nav class="admin-editor-tabs" aria-label="{{ __('Язык контента') }}">
@@ -34,7 +33,7 @@
         @csrf
         @method('PUT')
         <section class="admin-panel">
-            <h2>{{ __($pages[$page]) }} · {{ $languages[$language] }}</h2>
+            <h2>{{ $pages[$page] }} · {{ $languages[$language] }}</h2>
             <div class="admin-editor-layout">
                 <div class="admin-editor-fields">
                     @foreach($fields as $name => [$label, $limit])

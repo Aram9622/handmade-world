@@ -267,5 +267,9 @@
     "Добавить пункт": "Add item",
     "Удалить пункт": "Remove item",
     "Пункт меню добавлен.": "Menu item added.",
-    "Пункт меню удалён.": "Menu item removed."
+    "Пункт меню удалён.": "Menu item removed.",
+    "Новая категория": "New category",
+    "Адрес категории": "Category URL slug",
+    "Создать категорию": "Create category",
+    "Категория создана.": "Category created."
 }

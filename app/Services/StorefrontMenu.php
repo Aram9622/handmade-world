@@ -9,13 +9,31 @@ use Illuminate\Support\Facades\DB;
 
 class StorefrontMenu
 {
+    public function __construct(private readonly CatalogCategories $categories) {}
+
+    public function definitions(): array
+    {
+        $definitions = config('storefront_menu');
+        foreach ($this->categories->names(app()->getLocale()) as $category => $label) {
+            $definitions['category_'.$category] ??= [
+                'default_position' => 80,
+                'label' => $label,
+                'route' => 'catalog',
+                'parameters' => ['category' => $category],
+                'area' => 'categories',
+            ];
+        }
+
+        return $definitions;
+    }
+
     public function items(bool $includeRemoved = false): Collection
     {
         $stored = DB::table('storefront_menu_items')->get()->keyBy('key');
 
         $languages = array_keys(SetLocale::LANGUAGES);
 
-        return collect(config('storefront_menu'))->map(function (array $definition, string $key) use ($stored, $languages): array {
+        return collect($this->definitions())->map(function (array $definition, string $key) use ($stored, $languages): array {
             $item = $stored->get($key);
 
             return $definition + [
