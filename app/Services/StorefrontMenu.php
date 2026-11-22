@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 class StorefrontMenu
 {
-    public function items(): Collection
+    public function items(bool $includeRemoved = false): Collection
     {
         $stored = DB::table('storefront_menu_items')->get()->keyBy('key');
 
@@ -25,8 +25,9 @@ class StorefrontMenu
                 ),
                 'position' => $item ? (int) $item->position : $definition['default_position'],
                 'enabled' => $item ? (bool) $item->enabled : true,
+                'removed' => (bool) ($item->removed ?? false),
             ];
-        })->sortBy('position');
+        })->filter(fn (array $item) => $includeRemoved || !$item['removed'])->sortBy('position');
     }
 
     public function visible(?User $user): Collection
@@ -42,18 +43,37 @@ class StorefrontMenu
         ])->groupBy('area', preserveKeys: true);
     }
 
+    public function setCategoryRemoved(string $key, bool $removed): void
+    {
+        $item = $this->items(includeRemoved: true)->get($key);
+
+        $row = $this->row($key, $item) + ['removed' => $removed];
+        $columns = ['removed'];
+        if (!$removed) {
+            $row['enabled'] = true;
+            $columns[] = 'enabled';
+        }
+
+        DB::table('storefront_menu_items')->upsert([$row], ['key'], $columns);
+    }
+
     public function save(array $items): void
     {
         $rows = [];
         foreach ($items as $key => $item) {
-            $rows[] = [
-                'key' => $key,
-                'labels' => json_encode($item['labels'], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE),
-                'position' => $item['position'],
-                'enabled' => $item['enabled'],
-            ];
+            $rows[] = $this->row($key, $item);
         }
 
         DB::table('storefront_menu_items')->upsert($rows, ['key'], ['labels', 'position', 'enabled']);
+    }
+
+    private function row(string $key, array $item): array
+    {
+        return [
+            'key' => $key,
+            'labels' => json_encode($item['labels'], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE),
+            'position' => $item['position'],
+            'enabled' => $item['enabled'],
+        ];
     }
 }
