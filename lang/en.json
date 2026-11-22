@@ -261,5 +261,7 @@
     "Порядок": "Order",
     "Видимость": "Visibility",
     "Показывать": "Visible",
-    "Скрывать": "Hidden"
+    "Скрывать": "Hidden",
+    "Меню категорий": "Category menu",
+    "Пустая подпись использует название категории из редактора контента.": "Leave a label blank to use the category title from the content editor."
 }

@@ -20,7 +20,7 @@ class StorefrontMenu
 
             return $definition + [
                 'labels' => $item ? json_decode($item->labels, true) : array_map(
-                    fn (string $language) => __($definition['label'], [], $language),
+                    fn (string $language) => isset($definition['parameters']['category']) ? null : __($definition['label'], [], $language),
                     array_combine($languages, $languages),
                 ),
                 'position' => $item ? (int) $item->position : $definition['default_position'],
@@ -38,7 +38,7 @@ class StorefrontMenu
             default => true,
         })->map(fn (array $item) => $item + [
             'text' => $item['labels'][app()->getLocale()],
-            'href' => route($item['route']).(isset($item['fragment']) ? '#'.$item['fragment'] : ''),
+            'href' => route($item['route'], $item['parameters'] ?? []).(isset($item['fragment']) ? '#'.$item['fragment'] : ''),
         ])->groupBy('area', preserveKeys: true);
     }
 

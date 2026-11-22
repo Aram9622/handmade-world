@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\EditorialPage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -34,8 +35,17 @@ class StorefrontMenuTest extends TestCase
         $items['catalog']['position'] = 0;
         $items['categories']['enabled'] = '0';
         $items['admin']['labels']['en'] = 'Marketplace management';
+        $items['category_ceramics']['labels'] = ['ru' => null, 'en' => 'Clay works', 'hy' => null];
+        $items['category_ceramics']['position'] = 0;
+        $items['category_jewelry']['enabled'] = '0';
+        EditorialPage::create([
+            'page' => 'ceramics',
+            'locale' => 'ru',
+            'content' => ['title' => 'Изделия из глины'],
+            'images' => [],
+        ]);
 
-        $this->actingAs($admin)->get('/admin/menu')->assertOk()->assertSee('Меню витрины');
+        $this->actingAs($admin)->get('/admin/menu')->assertOk()->assertSee('Меню витрины')->assertSee('Меню категорий');
         $this->from('/admin/menu')->put('/admin/menu', ['items' => ['catalog' => $items['catalog']]])
             ->assertSessionHasErrors('items');
         $this->assertDatabaseCount('storefront_menu_items', 0);
@@ -48,5 +58,14 @@ class StorefrontMenuTest extends TestCase
             ->assertDontSee('Marketplace management')
             ->assertDontSee('href="'.route('catalog').'#category-heading"', false);
         $this->withSession(['locale' => 'hy'])->get('/')->assertSee('Արհեստների շուկա');
+
+        $this->withSession(['locale' => 'en'])->get('/?category=ceramics')
+            ->assertOk()
+            ->assertSeeInOrder(['Clay works', 'Все категории'])
+            ->assertSee('aria-current="page" >Clay works</a>', false)
+            ->assertDontSee('href="'.route('catalog', ['category' => 'jewelry']).'"', false);
+
+        $this->withSession(['locale' => 'ru'])->get('/?category=ceramics')
+            ->assertSee('aria-current="page" >Изделия из глины</a>', false);
     }
 }

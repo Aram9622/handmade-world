@@ -17,16 +17,20 @@ class StorefrontMenuController extends Controller
 
     public function update(Request $request, StorefrontMenu $menu): RedirectResponse
     {
-        $keys = implode(',', array_keys(config('storefront_menu')));
+        $definitions = config('storefront_menu');
+        $keys = implode(',', array_keys($definitions));
         $languages = implode(',', array_keys(SetLocale::LANGUAGES));
-        $data = $request->validate([
+        $rules = [
             'items' => ["required", "array:$keys", "required_array_keys:$keys"],
             'items.*' => ['required', 'array:labels,position,enabled'],
             'items.*.labels' => ["required", "array:$languages", "required_array_keys:$languages"],
-            'items.*.labels.*' => ['required', 'string', 'max:80'],
             'items.*.position' => ['required', 'integer', 'between:0,999'],
             'items.*.enabled' => ['required', 'boolean'],
-        ]);
+        ];
+        foreach ($definitions as $key => $definition) {
+            $rules["items.$key.labels.*"] = [isset($definition['parameters']['category']) ? 'nullable' : 'required', 'string', 'max:80'];
+        }
+        $data = $request->validate($rules);
 
         $menu->save($data['items']);
 
