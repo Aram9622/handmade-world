@@ -328,9 +328,10 @@ class MarketplaceTest extends TestCase
             ->assertRedirect(route('listings.show', $listing));
         $this->get(route('listings.show', $listing))->assertOk()->assertSee('637,50 ₽')->assertSee('2 550 ֏')->assertSee('8,50 US$');
         $this->withSession(['locale' => 'hy'])->get(route('listings.show', $listing))->assertOk()
-            ->assertSee('<strong data-sale-price>2 550 ֏</strong>', false)
-            ->assertSee('<option value="AMD" selected', false)
-            ->assertSee('data-sale="8,50 US$"', false);
+            ->assertSee('<strong>2 550 ֏</strong>', false)
+            ->assertSee('<details class="listing-currency-details">', false)
+            ->assertDontSee('name="display_currency"', false)
+            ->assertSee('8,50 US$', false);
         $this->withSession(['locale' => 'ru'])->get('/?sort=low-usd')->assertOk()->assertSeeInOrder(['Чашка', 'Только рубли']);
     }
 }

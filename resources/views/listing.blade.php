@@ -18,7 +18,6 @@
     <script type="application/ld+json">{!! \Illuminate\Support\Js::encode($product) !!}</script>
     <script src="{{ asset('listing-share.js') }}" defer></script>
     <script src="{{ asset('listing-gallery.js') }}" defer></script>
-    <script src="{{ asset('listing-price-picker.js') }}" defer></script>
 @endpush
 
 @section('content')
@@ -64,7 +63,7 @@
     <div class="detail-copy">
         <p class="category"><a class="text-link" href="{{ route('catalog', ['category' => $listing->category]) }}">{{ $categoryTitle }}</a></p>
         <h1>{{ $listing->title }}</h1>
-        @include('listing-price-picker')
+        @include('listing-price-panel')
         <dl class="fulfillment">
             @if($listing->city)
                 <div><dt>{{ __('Город') }}</dt><dd>{{ $listing->city }}</dd></div>
