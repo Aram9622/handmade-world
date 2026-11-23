@@ -74,6 +74,17 @@ class StorefrontMenuController extends Controller
         return to_route('admin.menu.edit')->withFragment('catalog-category-'.$data['slug'])->with('status', __('Категория создана.'));
     }
 
+    public function deleteCategory(string $category, CatalogCategories $categories): RedirectResponse
+    {
+        $back = to_route('admin.menu.edit')->withFragment('category-menu');
+
+        if (!$categories->deleteIfUnused($category)) {
+            return $back->with('category_delete_error', __('Категорию используют объявления, подписки или сохранённый контент.'));
+        }
+
+        return $back->with('status', __('Категория удалена.'));
+    }
+
     public function addCategory(Request $request, StorefrontMenu $menu): RedirectResponse
     {
         $categories = collect($menu->definitions())->where('area', 'categories')->keys()->all();
