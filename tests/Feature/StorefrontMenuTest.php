@@ -24,6 +24,8 @@ class StorefrontMenuTest extends TestCase
 
     public function test_saved_labels_visibility_and_order_apply_to_both_menus(): void
     {
+        $this->publishListings('ceramics', 'jewelry');
+
         $admin = User::factory()->create();
         $admin->forceFill(['is_super_admin' => true])->save();
         $member = User::factory()->create();
@@ -75,6 +77,8 @@ class StorefrontMenuTest extends TestCase
 
     public function test_category_menu_entries_can_be_removed_and_added_back(): void
     {
+        $this->publishListings('ceramics');
+
         $admin = User::factory()->create();
         $admin->forceFill(['is_super_admin' => true])->save();
         $link = 'href="'.route('catalog', ['category' => 'ceramics']).'"';
@@ -140,6 +144,8 @@ class StorefrontMenuTest extends TestCase
 
     public function test_category_row_order_is_shared_by_admin_and_storefront_navigation(): void
     {
+        $this->publishListings('ceramics', 'textile');
+
         $path = '/admin/catalog/categories/order';
         $this->actingAs(User::factory()->create())->patch($path, ['positions' => ['textile' => 0]])->assertForbidden();
 
@@ -162,6 +168,22 @@ class StorefrontMenuTest extends TestCase
         foreach (['/', '/?category=ceramics'] as $url) {
             $this->get($url)->assertOk()
                 ->assertSeeInOrder(['class="category-nav"', 'Все категории', '>Текстиль</a>', '>Керамика</a>'], false);
+        }
+    }
+
+    private function publishListings(string ...$categories): void
+    {
+        $seller = User::factory()->create();
+        foreach ($categories as $category) {
+            Listing::create([
+                'user_id' => $seller->id,
+                'category' => $category,
+                'price' => 1200,
+                'title' => 'Example listing',
+                'description' => 'Handmade item.',
+                'contact_email' => $seller->email,
+                'photo_path' => 'listings/example.webp',
+            ]);
         }
     }
 }

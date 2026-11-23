@@ -65,7 +65,12 @@ class ListingController extends Controller
 
         $editorial = $content->all(app()->getLocale());
 
-        return view('catalog', compact('editorial', 'listings', 'search', 'category', 'sort', 'showFeed', 'subscriptionFeed', 'subscribedCategories'));
+        $populatedCategories = array_intersect_key(
+            $editorial,
+            Listing::visible()->distinct()->pluck('category')->flip()->all(),
+        );
+
+        return view('catalog', compact('editorial', 'listings', 'search', 'category', 'sort', 'showFeed', 'subscriptionFeed', 'subscribedCategories', 'populatedCategories'));
     }
 
     public function show(Request $request, Listing $listing, EditorialContent $editorial)

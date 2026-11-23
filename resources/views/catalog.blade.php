@@ -62,7 +62,7 @@
             <select name="category">
                 <option value="">{{ __('Все категории') }}</option>
                 @foreach(array_diff_key($editorial, ['home' => true]) as $key => $name)
-                    @if(!$subscriptionFeed || in_array($key, $subscribedCategories, true))
+                    @if($subscriptionFeed ? in_array($key, $subscribedCategories, true) : ($key === $category || isset($populatedCategories[$key])))
                         <option value="{{ $key }}" @selected($key === $category)>{{ $editorial[$key]['title'] }}</option>
                     @endif
                 @endforeach

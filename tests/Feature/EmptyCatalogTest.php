@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Listing;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -27,9 +28,24 @@ class EmptyCatalogTest extends TestCase
         $this->get('/admin/menu')->assertOk()
             ->assertSee('id="catalog-category-paintings"', false)
             ->assertSeeInOrder(['Картины и рисунки', 'Открыть на витрине', 'Редактировать']);
-        $this->get('/')->assertOk()->assertSeeInOrder(['class="category-nav"', 'Картины и рисунки', 'home-cover'], false);
+        $this->get('/')->assertOk()->assertDontSee('Картины и рисунки')->assertDontSee('class="category-nav"', false);
         $this->get('/?category=paintings')->assertOk()->assertSee('Картины и рисунки');
         $this->get('/sell')->assertOk()->assertSee('value="paintings"', false);
+        $listing = Listing::create([
+            'user_id' => $admin->id,
+            'category' => 'paintings',
+            'title' => 'Пейзаж',
+            'description' => 'Картина маслом.',
+            'price' => 1200,
+            'contact_email' => $admin->email,
+            'photo_path' => 'listings/example.webp',
+        ]);
+        $this->get('/')->assertOk()->assertSeeInOrder(['class="category-nav"', 'Картины и рисунки', 'home-cover', 'class="category-tile"'], false)
+            ->assertSee('value="paintings"', false);
+        $listing->forceFill(['hidden_at' => now()])->save();
+        $this->get('/')->assertOk()->assertDontSee('Картины и рисунки')->assertDontSee('value="paintings"', false);
+        $listing->delete();
+
         $this->get('/admin/menu')->assertSee('Удалить категорию');
         $deletePath = '/admin/catalog/categories/paintings';
         $this->actingAs(User::factory()->create())->delete($deletePath)->assertForbidden();
