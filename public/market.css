@@ -436,9 +436,11 @@ html[lang="hy"] .home-cover h1{font-size:clamp(2.5rem,5.4vw,6rem)}
  background:var(--paper);
 }
 .listing-gallery-zoom{pointer-events:none}
-.listing-gallery-close{cursor:pointer;font:1.5rem/1 system-ui,sans-serif}
+.listing-gallery-close{cursor:pointer}
 .listing-gallery-dialog{
  position:fixed;
+ inset:0;
+ height:fit-content;
  margin:auto;
  width:max-content;
  max-width:calc(100% - 24px);

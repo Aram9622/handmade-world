@@ -39,7 +39,11 @@
         </div>
         <dialog class="listing-gallery-dialog" data-gallery-dialog aria-label="{{ __('Галерея изделия') }}">
             <form method="dialog">
-                <button class="listing-gallery-close" type="submit" aria-label="{{ __('Закрыть просмотр фото') }}" autofocus>×</button>
+                <button class="listing-gallery-close" type="submit" aria-label="{{ __('Закрыть просмотр фото') }}" autofocus>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                        <path d="m6 6 12 12M18 6 6 18"/>
+                    </svg>
+                </button>
             </form>
             <img alt="{{ $listing->title }}" data-gallery-swipe>
             @if(count($gallery) > 1)
