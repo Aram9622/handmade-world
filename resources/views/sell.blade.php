@@ -11,7 +11,7 @@
 @section(!empty($adminEdit) ? 'admin-content' : 'content')
 <section class="{{ !empty($adminEdit) ? 'admin-panel' : 'panel listing-editor-panel' }}">
     @if(!empty($adminEdit))
-        <a class="text-link" href="{{ route('listings.show', $listing) }}">{{ __('Открыть на витрине') }}</a>
+        <a class="text-link" href="{{ $listing->publicUrl() }}">{{ __('Открыть на витрине') }}</a>
     @else
         <h1>{{ $listing ? __('Редактировать изделие') : __('Продать изделие') }}</h1>
     @endif

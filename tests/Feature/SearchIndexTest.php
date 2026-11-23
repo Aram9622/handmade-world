@@ -15,7 +15,10 @@ class SearchIndexTest extends TestCase
     public function test_product_pages_expose_the_discounted_price_in_safe_structured_data(): void
     {
         $listing = $this->createListing();
-        $url = route('listings.show', $listing);
+        $url = $listing->publicUrl();
+        $this->assertStringEndsWith('/items/caska-bliudce-'.$listing->id, $url);
+        $this->get('/items/'.$listing->id.'?comments_page=2')
+            ->assertStatus(301)->assertRedirect($listing->publicUrl(['comments_page' => 2]));
 
         $response = $this->get($url)->assertOk()
             ->assertSee('<link rel="canonical" href="'.$url.'">', false)
@@ -46,7 +49,7 @@ class SearchIndexTest extends TestCase
         foreach ($map->url as $entry) {
             $locations[] = (string) $entry->loc;
         }
-        $this->assertSame([route('catalog'), $categoryUrl, route('listings.show', $listing)], $locations);
+        $this->assertSame([route('catalog'), $categoryUrl, $listing->publicUrl()], $locations);
 
         $this->get($categoryUrl)->assertOk()
             ->assertSee('Керамика ручной работы')

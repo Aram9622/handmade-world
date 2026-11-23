@@ -23,6 +23,8 @@ class EditorialContentTest extends TestCase
 
         $content = [
             'title' => 'Oil paintings',
+            'seo_title' => 'Gallery & paintings',
+            'seo_description' => 'Discover "oil paintings" by local artists.',
             'heading' => 'Available works',
             'intro' => 'Paintings by independent artists.',
             'cta' => 'View listings',
@@ -42,9 +44,12 @@ class EditorialContentTest extends TestCase
         $photo = new UploadedFile(public_path('images/editorial/paintings.webp'), 'cover.webp', 'image/webp', null, true);
         $this->put($url, [...$content, 'cover' => $photo])->assertRedirect($url);
 
-        $this->get($publicUrl)->assertOk()->assertSee('Цвет, свет и жест')->assertDontSee('Oil paintings');
+        $this->get($publicUrl)->assertOk()->assertSee('Цвет, свет и жест')->assertDontSee('Oil paintings')->assertDontSee('Gallery & paintings');
         $this->withSession(['locale' => 'en'])->get($publicUrl)->assertOk()
             ->assertSee('Oil paintings')
+            ->assertSee('<title>Gallery &amp; paintings | Handmade Work</title>', false)
+            ->assertSee('<meta name="description" content="Discover &quot;oil paintings&quot; by local artists.">', false)
+            ->assertSee('<meta property="og:title" content="Gallery &amp; paintings">', false)
             ->assertSee('Timeline text.')
             ->assertSee('Gallery example')
             ->assertSee(route('editorial.image', ['paintings', 'en', 'cover']));

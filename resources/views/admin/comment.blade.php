@@ -1,5 +1,5 @@
 <td>
-    <a class="text-link" href="{{ route('listings.show', $comment->listing) }}#comments">{{ $comment->listing->title }}</a>
+    <a class="text-link" href="{{ $comment->listing->publicUrl() }}#comments">{{ $comment->listing->title }}</a>
     <p><strong>{{ $comment->author->name }}</strong></p>
     <p class="description">{{ $comment->body }}</p>
 </td>

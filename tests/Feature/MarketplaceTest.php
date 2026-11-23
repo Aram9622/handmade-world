@@ -37,14 +37,14 @@ class MarketplaceTest extends TestCase
             'photo' => new UploadedFile(public_path('images/workshop.webp'), 'workshop.webp', 'image/webp', null, true),
         ]);
         $listing = Listing::sole();
-        $response->assertRedirect(route('listings.show', $listing));
+        $response->assertRedirect($listing->publicUrl());
         Storage::disk('local')->assertExists($listing->photo_path);
 
         $this->post('/logout')->assertRedirect('/');
         $this->get('/?'.http_build_query(['q' => 'КЕРАМИЧЕСКАЯ', 'category' => 'ceramics', 'sort' => 'low']))
             ->assertOk()->assertSee('Керамическая чашка');
         $this->get('/?category=jewelry')->assertOk()->assertDontSee('Керамическая чашка', false);
-        $this->get(route('listings.show', $listing))->assertOk()->assertSee('Написать продавцу');
+        $this->get($listing->publicUrl())->assertOk()->assertSee('Написать продавцу');
         $this->get(route('listings.photo', $listing))->assertOk()->assertHeader('Content-Type', 'image/webp');
 
         $this->actingAs(User::factory()->create())->delete(route('listings.destroy', $listing))->assertForbidden();
@@ -89,7 +89,7 @@ class MarketplaceTest extends TestCase
             ->assertOk()->assertSee($listing->title)->assertDontSee('Чужое изделие');
         $this->get($edit)->assertOk()->assertSee('value="1200"', false);
 
-        $this->put($update, [...$data, 'price' => 1500])->assertRedirect(route('listings.show', $listing));
+        $this->put($update, [...$data, 'price' => 1500])->assertRedirect($listing->publicUrl());
         $this->assertSame(1500, $listing->refresh()->price);
         $this->assertSame('listings/original.webp', $listing->photo_path);
         $disk->assertExists($listing->photo_path);
@@ -99,7 +99,7 @@ class MarketplaceTest extends TestCase
         $disk->assertExists('listings/original.webp');
 
         $photo = new UploadedFile(public_path('images/workshop.webp'), 'replacement.webp', 'image/webp', null, true);
-        $this->put($update, [...$data, 'photo' => $photo])->assertRedirect(route('listings.show', $listing));
+        $this->put($update, [...$data, 'photo' => $photo])->assertRedirect($listing->publicUrl());
         $disk->assertMissing('listings/original.webp');
         $disk->assertExists($listing->refresh()->photo_path);
         $this->get(route('listings.photo', $listing))->assertOk()->assertHeader('Content-Type', 'image/webp');
@@ -118,7 +118,7 @@ class MarketplaceTest extends TestCase
         $listing = Listing::create([...$data, 'user_id' => $owner->id, 'photo_path' => 'listings/cup.webp']);
         Listing::create([...$data, 'title' => 'Блюдо без скидки', 'price' => 900, 'user_id' => $owner->id, 'photo_path' => 'listings/plate.webp']);
         $update = route('listings.update', $listing);
-        $url = route('listings.show', $listing);
+        $url = $listing->publicUrl();
 
         $this->actingAs($owner)->put($update, [...$data, 'discount_percent' => 100])
             ->assertSessionHasErrors('discount_percent');
@@ -153,7 +153,7 @@ class MarketplaceTest extends TestCase
         ];
         $listing = Listing::create([...$data, 'user_id' => $owner->id, 'photo_path' => 'listings/cup.webp']);
         $update = route('listings.update', $listing);
-        $url = route('listings.show', $listing);
+        $url = $listing->publicUrl();
 
         $this->get($url)->assertOk()->assertSee('По договорённости');
         $this->actingAs($owner)->put($update, [...$data, 'fulfillment_method' => 'pickup'])
@@ -204,7 +204,7 @@ class MarketplaceTest extends TestCase
         ];
         $listing = Listing::create([...$data, 'user_id' => $owner->id, 'photo_path' => 'listings/cup.webp']);
         $update = route('listings.update', $listing);
-        $url = route('listings.show', $listing);
+        $url = $listing->publicUrl();
 
         $this->get($url)->assertOk()->assertDontSee('href="tel:', false);
         $this->actingAs($owner)->put($update, [...$data, 'contact_phone' => '+7 900 ABC-45-67'])
@@ -279,7 +279,7 @@ class MarketplaceTest extends TestCase
 Лён", $listing->description);
         $this->assertSame($owner->id, $listing->user_id);
         $photo = route('listings.gallery-photo', [$listing, $id]);
-        $this->get(route('listings.show', $listing))->assertOk()
+        $this->get($listing->publicUrl())->assertOk()
             ->assertSee('<strong>Лён</strong>', false)->assertDontSee('bad()')
             ->assertSee('120 × 160 см')->assertSee('data-gallery-thumb', false)
             ->assertSee('data-gallery-dialog', false);
@@ -319,15 +319,15 @@ class MarketplaceTest extends TestCase
         ])->assertRedirect();
         $listing = Listing::where('title', 'Чашка')->sole();
         $this->assertNull($listing->price);
-        $this->get(route('listings.show', $listing))->assertOk()->assertSee('2 550 ֏')->assertSee('8,50 $');
+        $this->get($listing->publicUrl())->assertOk()->assertSee('2 550 ֏')->assertSee('8,50 $');
 
         $update = route('listings.update', $listing);
         $this->put($update, [...$data, 'price' => '', 'price_amd' => '', 'price_usd' => ''])
             ->assertSessionHasErrors('price');
         $this->put($update, [...$data, 'price' => 750, 'price_amd' => 3000, 'price_usd' => 10])
-            ->assertRedirect(route('listings.show', $listing));
-        $this->get(route('listings.show', $listing))->assertOk()->assertSee('637,50 ₽')->assertSee('2 550 ֏')->assertSee('8,50 $');
-        $this->withSession(['locale' => 'hy'])->get(route('listings.show', $listing))->assertOk()
+            ->assertRedirect($listing->publicUrl());
+        $this->get($listing->publicUrl())->assertOk()->assertSee('637,50 ₽')->assertSee('2 550 ֏')->assertSee('8,50 $');
+        $this->withSession(['locale' => 'hy'])->get($listing->publicUrl())->assertOk()
             ->assertSee('<strong>2 550 ֏</strong>', false)
             ->assertSee('<details class="listing-currency-details">', false)
             ->assertDontSee('name="display_currency"', false)
@@ -347,7 +347,7 @@ class MarketplaceTest extends TestCase
             'photo_path' => 'listings/example.webp',
         ];
         $listing = Listing::create([...$data, 'title' => 'Исходное изделие']);
-        $url = route('listings.show', $listing);
+        $url = $listing->publicUrl();
         $this->get($url)->assertOk()->assertDontSee('Похожие изделия');
 
         foreach (['Старая чашка', 'Чайник', 'Ваза', 'Новая кружка'] as $title) {

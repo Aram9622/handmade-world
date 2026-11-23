@@ -65,7 +65,7 @@ class AdminTest extends TestCase
             'photo_path' => 'listings/cup.webp',
         ]);
         $comment = $listing->comments()->create(['user_id' => $maker->id, 'body' => 'Комментарий для проверки.']);
-        $url = route('listings.show', $listing);
+        $url = $listing->publicUrl();
 
         $this->actingAs($maker)->patch(route('admin.comments.update', $comment), ['hidden' => 1])->assertForbidden();
         $this->actingAs($admin)->from('/admin')->patch(route('admin.comments.update', $comment), ['hidden' => 1])->assertRedirect('/admin');

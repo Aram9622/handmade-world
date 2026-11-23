@@ -33,8 +33,8 @@ class SearchIndexController extends Controller
                 $this->writeUrl($xml, route('catalog', ['category' => $category]));
             }
 
-            foreach (Listing::visible()->select(['id', 'updated_at'])->lazyById() as $listing) {
-                $this->writeUrl($xml, route('listings.show', $listing), $listing->updated_at?->toAtomString());
+            foreach (Listing::visible()->select(['id', 'title', 'updated_at'])->lazyById() as $listing) {
+                $this->writeUrl($xml, $listing->publicUrl(), $listing->updated_at?->toAtomString());
             }
 
             $xml->endElement();

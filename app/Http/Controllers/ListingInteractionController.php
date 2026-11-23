@@ -12,7 +12,7 @@ class ListingInteractionController extends Controller
     {
         abort_if($listing->hidden_at !== null, 404);
 
-        return to_route('listings.show', $listing)->withFragment('interactions');
+        return redirect()->to($listing->publicUrl())->withFragment('interactions');
     }
 
     public function like(Request $request, Listing $listing): RedirectResponse
@@ -24,7 +24,7 @@ class ListingInteractionController extends Controller
             'user_id' => $request->user()->id,
         ]);
 
-        return to_route('listings.show', $listing)->withFragment('interactions');
+        return redirect()->to($listing->publicUrl())->withFragment('interactions');
     }
 
     public function unlike(Request $request, Listing $listing): RedirectResponse
@@ -33,7 +33,7 @@ class ListingInteractionController extends Controller
 
         $listing->likes()->detach($request->user()->id);
 
-        return to_route('listings.show', $listing)->withFragment('interactions');
+        return redirect()->to($listing->publicUrl())->withFragment('interactions');
     }
 
     public function comment(Request $request, Listing $listing): RedirectResponse
@@ -44,6 +44,6 @@ class ListingInteractionController extends Controller
 
         $listing->comments()->create(['body' => $data['comment'], 'user_id' => $request->user()->id]);
 
-        return to_route('listings.show', $listing)->withFragment('comments');
+        return redirect()->to($listing->publicUrl())->withFragment('comments');
     }
 }

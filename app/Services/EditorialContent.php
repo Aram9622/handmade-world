@@ -55,6 +55,7 @@ class EditorialContent
                 );
                 $record = EditorialPage::whereKey($record->id)->lockForUpdate()->firstOrFail();
                 $previous = $record->images;
+                $content += array_intersect_key($record->content, ['seo_title' => true, 'seo_description' => true]);
                 $record->update(['content' => $content, 'images' => array_replace($previous, $newImages)]);
 
                 return array_intersect_key($previous, $newImages);
