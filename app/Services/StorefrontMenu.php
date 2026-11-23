@@ -6,6 +6,7 @@ use App\Http\Middleware\SetLocale;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class StorefrontMenu
 {
@@ -61,14 +62,29 @@ class StorefrontMenu
         ])->groupBy('area', preserveKeys: true);
     }
 
-    public function setCategoryPosition(string $category, int $position): void
+    public function setCategoryPositions(array $positions): void
     {
-        $this->categories->withExistingCategory($category, function () use ($category, $position): void {
-            $key = 'category_'.$category;
-            $item = $this->items(includeRemoved: true)->get($key);
-            $item['position'] = $position;
+        DB::transaction(function () use ($positions): void {
+            $slugs = array_keys($positions);
+            $existing = DB::table('catalog_categories')->whereIn('slug', $slugs)
+                ->orderBy('slug')->lockForUpdate()->pluck('slug')->all();
 
-            DB::table('storefront_menu_items')->upsert([$this->row($key, $item)], ['key'], ['position']);
+            if (array_diff($slugs, $existing)) {
+                throw ValidationException::withMessages([
+                    'positions' => __('validation.exists', ['attribute' => __('Категория')]),
+                ]);
+            }
+
+            $items = $this->items(includeRemoved: true);
+            $rows = [];
+            foreach ($existing as $slug) {
+                $key = 'category_'.$slug;
+                $item = $items->get($key);
+                $item['position'] = (int) $positions[$slug];
+                $rows[] = $this->row($key, $item);
+            }
+
+            DB::table('storefront_menu_items')->upsert($rows, ['key'], ['position']);
         });
     }
 

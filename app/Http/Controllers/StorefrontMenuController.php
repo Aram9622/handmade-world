@@ -75,13 +75,16 @@ class StorefrontMenuController extends Controller
         return to_route('admin.menu.edit')->withFragment('catalog-category-'.$data['slug'])->with('status', __('Категория создана.'));
     }
 
-    public function orderCategory(Request $request, string $category, StorefrontMenu $menu): RedirectResponse
+    public function orderCategories(Request $request, StorefrontMenu $menu): RedirectResponse
     {
-        $data = $request->validate(['position' => ['required', 'integer', 'between:0,999']]);
+        $data = $request->validate([
+            'positions' => ['required', 'array'],
+            'positions.*' => ['required', 'integer', 'between:0,999'],
+        ]);
 
-        $menu->setCategoryPosition($category, (int) $data['position']);
+        $menu->setCategoryPositions($data['positions']);
 
-        return to_route('admin.menu.edit')->withFragment('catalog-category-'.$category)
+        return to_route('admin.menu.edit')->withFragment('category-menu')
             ->with('status', __('Изменения сохранены.'));
     }
 

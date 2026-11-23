@@ -40,14 +40,10 @@
                 <li id="catalog-category-{{ $slug }}">
                     <span><strong>{{ $name }}</strong> <small>{{ $slug }}</small></span>
                     <div>
-                        <form class="admin-category-order" action="{{ route('admin.catalog.categories.order', $slug) }}" method="post">
-                            @csrf
-                            @method('PATCH')
-                            <label>{{ __('Порядок') }}
-                                <input name="position" type="number" min="0" max="999" value="{{ $item['position'] }}" required>
-                            </label>
-                            <button type="submit" class="button small">{{ __('Сохранить изменения') }}</button>
-                        </form>
+                        <label class="admin-category-order">{{ __('Порядок') }}
+                            <input form="category-order" name="positions[{{ $slug }}]" type="number" min="0" max="999"
+                                value="{{ old("positions.$slug", $item['position']) }}" required>
+                        </label>
                         <a class="text-link" href="{{ route('catalog', ['category' => $slug]) }}">{{ __('Открыть на витрине') }}</a>
                         <a class="text-link" href="{{ route('admin.editorial.edit', [$slug, app()->getLocale()]) }}">{{ __('Редактировать') }}</a>
                         <form action="{{ route('admin.catalog.categories.destroy', $slug) }}" method="post"
@@ -60,6 +56,11 @@
                 </li>
             @endforeach
         </ul>
+        <form id="category-order" class="admin-menu-create" action="{{ route('admin.catalog.categories.order') }}" method="post">
+            @csrf
+            @method('PATCH')
+            <button type="submit" class="button">{{ __('Сохранить порядок категорий') }}</button>
+        </form>
     @else
         <p>{{ __('Пока нет категорий.') }}</p>
     @endif
