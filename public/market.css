@@ -526,11 +526,6 @@ body:has(.listing-gallery-dialog[open]){overflow:hidden}
 @media(max-width:420px){.listing-price-fields{grid-template-columns:1fr}}
 
 .listing-price-panel{
- display:flex;
- flex-wrap:wrap;
- align-items:center;
- justify-content:space-between;
- gap:10px 18px;
  margin:20px 0;
  padding:12px 16px;
  border:1px solid var(--line);
@@ -545,7 +540,10 @@ body:has(.listing-gallery-dialog[open]){overflow:hidden}
  font-variant-numeric:tabular-nums;
 }
 .listing-price-discount{display:flex;align-items:center;flex-wrap:wrap;gap:.5rem;margin-top:4px}
-.listing-currency-field{gap:3px;color:var(--muted);font-size:.75rem}
-.listing-currency-field[hidden]{display:none}
-.listing-currency-field select{width:auto;min-height:44px;font-size:.9rem;font-weight:700;cursor:pointer}
-.listing-price-alternatives{display:flex;flex-wrap:wrap;gap:10px;color:var(--muted);font-size:.875rem}
+.listing-currency-details{margin-top:.6rem}
+.listing-currency-details summary{width:fit-content;padding:.35rem 0;color:var(--accent);font-size:.875rem;font-weight:650;cursor:pointer}
+.listing-price-alternatives{margin:.25rem 0 0;font-size:.9rem}
+.listing-price-alternatives div{display:flex;justify-content:space-between;flex-wrap:wrap;gap:.25rem .75rem;border-top:1px solid var(--line);padding:.45rem 0}
+.listing-price-alternatives dt{color:var(--muted)}
+.listing-price-alternatives dd{margin:0;font-weight:650;font-variant-numeric:tabular-nums}
+.listing-price-alternatives del{margin-inline-end:.4rem}
