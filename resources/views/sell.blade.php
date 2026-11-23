@@ -3,6 +3,7 @@
 
 @push('metadata')
     <meta name="robots" content="noindex, follow">
+    <script src="{{ asset('listing-photo-picker.js') }}" defer></script>
 @endpush
 
 @section('content')
@@ -26,13 +27,7 @@
             <small>{{ __('От 0 до 99. Оставьте поле пустым, чтобы убрать скидку.') }}</small>
             <input type="number" name="discount_percent" min="0" max="99" step="1" value="{{ old('discount_percent', $listing?->discount_percent) }}">
         </label>
-        @if($listing)
-            <img class="edit-photo" src="{{ route('listings.photo', $listing) }}" alt="{{ __('Текущая фотография изделия') }}">
-        @endif
-        <label>{{ $listing ? __('Заменить фотографию') : __('Фотография') }}
-            <small>{{ __('JPG, PNG или WebP, до 5 МБ') }}</small>
-            <input type="file" name="photo" accept="image/jpeg,image/png,image/webp" @required(!$listing)>
-        </label>
+        @include('listing-photo-picker')
         <label>{{ __('Город') }}
             <small>{{ __('Укажите город, если предлагаете самовывоз.') }}</small>
             <input name="city" maxlength="100" autocomplete="address-level2" value="{{ old('city', $listing?->city) }}">
