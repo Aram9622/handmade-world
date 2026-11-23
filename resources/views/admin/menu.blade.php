@@ -29,12 +29,25 @@
     @if(session('category_delete_error'))
         <p class="notice" role="alert">{{ session('category_delete_error') }}</p>
     @endif
-    @if($categories)
+    @if($categories->isNotEmpty())
+        <p>{{ __('В каждой части меню пункты с меньшим номером показываются первыми.') }}</p>
         <ul class="admin-category-list">
-            @foreach($categories as $slug => $name)
+            @foreach($categories as $item)
+                @php
+                    $slug = $item['parameters']['category'];
+                    $name = $item['label'];
+                @endphp
                 <li id="catalog-category-{{ $slug }}">
                     <span><strong>{{ $name }}</strong> <small>{{ $slug }}</small></span>
                     <div>
+                        <form class="admin-category-order" action="{{ route('admin.catalog.categories.order', $slug) }}" method="post">
+                            @csrf
+                            @method('PATCH')
+                            <label>{{ __('Порядок') }}
+                                <input name="position" type="number" min="0" max="999" value="{{ $item['position'] }}" required>
+                            </label>
+                            <button type="submit" class="button small">{{ __('Сохранить изменения') }}</button>
+                        </form>
                         <a class="text-link" href="{{ route('catalog', ['category' => $slug]) }}">{{ __('Открыть на витрине') }}</a>
                         <a class="text-link" href="{{ route('admin.editorial.edit', [$slug, app()->getLocale()]) }}">{{ __('Редактировать') }}</a>
                         <form action="{{ route('admin.catalog.categories.destroy', $slug) }}" method="post"
