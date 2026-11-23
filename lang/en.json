@@ -274,5 +274,9 @@
     "Категория создана.": "Category created.",
     "Созданные категории": "Created categories",
     "Открыть на витрине": "Open on storefront",
-    "Пока нет категорий.": "No categories yet."
+    "Пока нет категорий.": "No categories yet.",
+    "Удалить категорию": "Delete category",
+    "Удалить категорию «:name»?": "Delete the “:name” category?",
+    "Категория удалена.": "Category deleted.",
+    "Категорию используют объявления, подписки или сохранённый контент.": "The category has listings, subscriptions, or saved content."
 }

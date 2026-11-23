@@ -267,5 +267,5 @@
     scroll-margin-top: 1rem;
 }
 .admin-category-list li:target { background: var(--tint); }
-.admin-category-list li div { display: flex; flex-wrap: wrap; gap: .5rem 1rem; }
+.admin-category-list li div { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem 1rem; }
 .admin-menu-create { margin-top: 12px; }

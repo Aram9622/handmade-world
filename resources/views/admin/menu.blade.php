@@ -26,6 +26,9 @@
         </fieldset>
     </form>
     <h3>{{ __('Созданные категории') }}</h3>
+    @if(session('category_delete_error'))
+        <p class="notice" role="alert">{{ session('category_delete_error') }}</p>
+    @endif
     @if($categories)
         <ul class="admin-category-list">
             @foreach($categories as $slug => $name)
@@ -34,6 +37,12 @@
                     <div>
                         <a class="text-link" href="{{ route('catalog', ['category' => $slug]) }}">{{ __('Открыть на витрине') }}</a>
                         <a class="text-link" href="{{ route('admin.editorial.edit', [$slug, app()->getLocale()]) }}">{{ __('Редактировать') }}</a>
+                        <form action="{{ route('admin.catalog.categories.destroy', $slug) }}" method="post"
+                            data-confirm="{{ __('Удалить категорию «:name»?', ['name' => $name]) }}" onsubmit="return confirm(this.dataset.confirm)">
+                            @csrf
+                            @method('DELETE')
+                            <button class="button small outline" type="submit">{{ __('Удалить категорию') }}</button>
+                        </form>
                     </div>
                 </li>
             @endforeach

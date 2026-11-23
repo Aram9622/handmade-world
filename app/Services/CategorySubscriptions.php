@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\DB;
 
 class CategorySubscriptions
 {
+    public function __construct(private readonly CatalogCategories $catalog) {}
+
     /** @return list<string> */
     public function categories(User $user): array
     {
@@ -16,7 +18,10 @@ class CategorySubscriptions
 
     public function subscribe(User $user, string $category): void
     {
-        $this->forUser($user)->insertOrIgnore(['user_id' => $user->id, 'category' => $category]);
+        $this->catalog->withExistingCategory(
+            $category,
+            fn () => $this->forUser($user)->insertOrIgnore(['user_id' => $user->id, 'category' => $category]),
+        );
     }
 
     public function unsubscribe(User $user, string $category): void

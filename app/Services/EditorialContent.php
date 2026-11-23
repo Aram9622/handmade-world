@@ -48,7 +48,7 @@ class EditorialContent
                 $newImages[$slot] = $path;
             }
 
-            $oldImages = DB::transaction(function () use ($page, $locale, $content, $newImages): array {
+            $save = function () use ($page, $locale, $content, $newImages): array {
                 $record = EditorialPage::firstOrCreate(
                     ['page' => $page, 'locale' => $locale],
                     ['content' => [], 'images' => []],
@@ -58,7 +58,10 @@ class EditorialContent
                 $record->update(['content' => $content, 'images' => array_replace($previous, $newImages)]);
 
                 return array_intersect_key($previous, $newImages);
-            });
+            };
+            $oldImages = $page === 'home'
+                ? DB::transaction($save)
+                : $this->categories->withExistingCategory($page, $save);
         } catch (Throwable $exception) {
             $disk->delete(array_values($newImages));
             throw $exception;

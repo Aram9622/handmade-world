@@ -30,6 +30,15 @@ class EmptyCatalogTest extends TestCase
         $this->get('/')->assertOk()->assertSeeInOrder(['class="category-nav"', 'Картины и рисунки', 'home-cover'], false);
         $this->get('/?category=paintings')->assertOk()->assertSee('Картины и рисунки');
         $this->get('/sell')->assertOk()->assertSee('value="paintings"', false);
+        $this->get('/admin/menu')->assertSee('Удалить категорию');
+        $deletePath = '/admin/catalog/categories/paintings';
+        $this->actingAs(User::factory()->create())->delete($deletePath)->assertForbidden();
+        $this->actingAs($admin)->post('/admin/menu/categories', ['item' => 'category_paintings'])->assertRedirect();
+        $this->delete($deletePath)->assertRedirect('/admin/menu#category-menu');
+        $this->assertDatabaseMissing('catalog_categories', ['slug' => 'paintings']);
+        $this->assertDatabaseMissing('storefront_menu_items', ['key' => 'category_paintings']);
+        $this->get('/')->assertOk()->assertDontSee('Картины и рисунки');
+        $this->get('/sell')->assertOk()->assertDontSee('value="paintings"', false);
     }
 
     public function test_migration_preserves_only_legacy_categories_with_existing_data(): void
@@ -44,5 +53,12 @@ class EmptyCatalogTest extends TestCase
         $this->assertDatabaseCount('catalog_categories', 1);
         $this->assertDatabaseHas('catalog_categories', ['slug' => 'ceramics']);
         $this->get('/?category=ceramics')->assertOk()->assertSee('Керамика');
+
+        $admin = User::factory()->create();
+        $admin->forceFill(['is_super_admin' => true])->save();
+        $this->actingAs($admin)->delete('/admin/catalog/categories/ceramics')
+            ->assertRedirect('/admin/menu#category-menu')->assertSessionHas('category_delete_error');
+        $this->assertDatabaseHas('catalog_categories', ['slug' => 'ceramics']);
+        $this->assertDatabaseHas('category_subscriptions', ['user_id' => $member->id, 'category' => 'ceramics']);
     }
 }
