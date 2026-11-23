@@ -281,8 +281,11 @@ class MarketplaceTest extends TestCase
         $photo = route('listings.gallery-photo', [$listing, $id]);
         $this->get(route('listings.show', $listing))->assertOk()
             ->assertSee('<strong>Лён</strong>', false)->assertDontSee('bad()')
-            ->assertSee('120 × 160 см')->assertSee('data-gallery-thumb', false);
+            ->assertSee('120 × 160 см')->assertSee('data-gallery-thumb', false)
+            ->assertSee('data-gallery-dialog', false);
         $this->get($photo)->assertOk()->assertHeader('Content-Type', 'image/webp');
+        $this->get($edit)->assertOk()->assertSee('class="gallery-remove-icon"', false)
+            ->assertSee('aria-label="Удалить фото 1"', false);
 
         $listing->forceFill(['hidden_at' => now()])->save();
         $this->actingAs(User::factory()->create())->get($photo)->assertNotFound();

@@ -40,9 +40,16 @@
                 @if($listing->gallery)
                     <div class="listing-gallery-edit">
                         @foreach($listing->gallery as $image => $path)
-                            <label>
+                            <label class="gallery-remove-photo" title="{{ __('Удалить фото') }}">
+                                <input type="checkbox" name="remove_gallery[]" value="{{ $image }}"
+                                    aria-label="{{ __('Удалить фото :number', ['number' => $loop->iteration]) }}"
+                                    @checked(in_array($image, (array) old('remove_gallery', []), true))>
                                 <img src="{{ route('listings.gallery-photo', [$listing, $image]) }}" alt="" loading="lazy">
-                                <span><input type="checkbox" name="remove_gallery[]" value="{{ $image }}" @checked(in_array($image, (array) old('remove_gallery', []), true))> {{ __('Удалить фото') }}</span>
+                                <span class="gallery-remove-icon" aria-hidden="true">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13m-7 4v5m2-5v5"/>
+                                    </svg>
+                                </span>
                             </label>
                         @endforeach
                     </div>
