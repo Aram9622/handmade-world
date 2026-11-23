@@ -279,5 +279,9 @@
     "Удалить категорию «:name»?": "Delete the “:name” category?",
     "Категория удалена.": "Category deleted.",
     "Категорию используют объявления, подписки или сохранённый контент.": "The category has listings, subscriptions, or saved content.",
-    "Сохранить порядок категорий": "Save category order"
+    "Сохранить порядок категорий": "Save category order",
+    "Предпросмотр фотографии": "Photo preview",
+    "Не удалось открыть фото. Выберите JPG, PNG или WebP до 5 МБ.": "Could not open the photo. Choose a JPG, PNG, or WebP up to 5 MB.",
+    "Выбрать фотографию": "Choose photo",
+    "Отменить выбор": "Clear selection"
 }
