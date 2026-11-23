@@ -307,5 +307,8 @@
     "Материал": "Material",
     "Лён": "Linen",
     "Убрать строку": "Remove row",
-    "Добавить характеристику": "Add specification"
+    "Добавить характеристику": "Add specification",
+    "Увеличить фото": "Enlarge photo",
+    "Закрыть просмотр фото": "Close photo viewer",
+    "Удалить фото :number": "Remove photo :number"
 }
