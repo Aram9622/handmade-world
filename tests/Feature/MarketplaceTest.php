@@ -319,19 +319,19 @@ class MarketplaceTest extends TestCase
         ])->assertRedirect();
         $listing = Listing::where('title', 'Чашка')->sole();
         $this->assertNull($listing->price);
-        $this->get(route('listings.show', $listing))->assertOk()->assertSee('2 550 ֏')->assertSee('8,50 US$');
+        $this->get(route('listings.show', $listing))->assertOk()->assertSee('2 550 ֏')->assertSee('8,50 $');
 
         $update = route('listings.update', $listing);
         $this->put($update, [...$data, 'price' => '', 'price_amd' => '', 'price_usd' => ''])
             ->assertSessionHasErrors('price');
         $this->put($update, [...$data, 'price' => 750, 'price_amd' => 3000, 'price_usd' => 10])
             ->assertRedirect(route('listings.show', $listing));
-        $this->get(route('listings.show', $listing))->assertOk()->assertSee('637,50 ₽')->assertSee('2 550 ֏')->assertSee('8,50 US$');
+        $this->get(route('listings.show', $listing))->assertOk()->assertSee('637,50 ₽')->assertSee('2 550 ֏')->assertSee('8,50 $');
         $this->withSession(['locale' => 'hy'])->get(route('listings.show', $listing))->assertOk()
             ->assertSee('<strong>2 550 ֏</strong>', false)
             ->assertSee('<details class="listing-currency-details">', false)
             ->assertDontSee('name="display_currency"', false)
-            ->assertSee('8,50 US$', false);
+            ->assertSee('8,50 $', false);
         $this->withSession(['locale' => 'ru'])->get('/?sort=low-usd')->assertOk()->assertSeeInOrder(['Чашка', 'Только рубли']);
     }
 }
