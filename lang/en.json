@@ -314,5 +314,6 @@
     "Предыдущее фото": "Previous photo",
     "Следующее фото": "Next photo",
     "Цены": "Prices",
-    "Укажите цену хотя бы в одной валюте.": "Enter a price in at least one currency."
+    "Укажите цену хотя бы в одной валюте.": "Enter a price in at least one currency.",
+    "Валюта": "Currency"
 }
