@@ -29,6 +29,16 @@
 
     @include('errors')
 
+    @if($page !== 'home')
+        <form class="admin-panel" id="category-palette" method="post" action="{{ route('admin.catalog.categories.palette', [$page, $language]) }}">
+            @csrf
+            @method('PATCH')
+            <h2>{{ __('Цветовая гамма категории') }}</h2>
+            @include('admin.category-palette-fields')
+            <button class="button small admin-menu-create" type="submit">{{ __('Сохранить гамму') }}</button>
+        </form>
+    @endif
+
     <form class="stack admin-editor" action="{{ route('admin.editorial.update', [$page, $language]) }}" method="post" enctype="multipart/form-data">
         @csrf
         @method('PUT')

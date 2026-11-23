@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Middleware\SetLocale;
 use App\Models\EditorialPage;
+use App\Services\CatalogCategories;
 use App\Services\EditorialContent;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,14 +14,16 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class EditorialController extends Controller
 {
-    public function edit(EditorialContent $editorial, string $page = 'home', string $language = 'ru'): View
+    public function edit(EditorialContent $editorial, CatalogCategories $categories, string $page = 'home', string $language = 'ru'): View
     {
         $this->validateSelection($editorial, $page, $language);
         $content = $editorial->get($page, $language);
 
         $pages = $editorial->pages(app()->getLocale());
 
-        return view('admin.editorial', compact('page', 'language', 'content', 'pages'));
+        $palette = $page === 'home' ? null : $categories->palette($page);
+
+        return view('admin.editorial', compact('page', 'language', 'content', 'pages', 'palette'));
     }
 
     public function update(Request $request, EditorialContent $editorial, string $page, string $language): RedirectResponse

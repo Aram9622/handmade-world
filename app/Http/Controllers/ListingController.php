@@ -70,7 +70,9 @@ class ListingController extends Controller
             Listing::visible()->distinct()->pluck('category')->flip()->all(),
         );
 
-        return view('catalog', compact('editorial', 'listings', 'search', 'category', 'sort', 'showFeed', 'subscriptionFeed', 'subscribedCategories', 'populatedCategories'));
+        $categoryTheme = $category === '' || $subscriptionFeed ? null : $categories->theme($category);
+
+        return view('catalog', compact('editorial', 'listings', 'search', 'category', 'sort', 'showFeed', 'subscriptionFeed', 'subscribedCategories', 'populatedCategories', 'categoryTheme'));
     }
 
     public function show(Request $request, Listing $listing, EditorialContent $editorial)

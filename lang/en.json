@@ -283,5 +283,10 @@
     "Предпросмотр фотографии": "Photo preview",
     "Не удалось открыть фото. Выберите JPG, PNG или WebP до 5 МБ.": "Could not open the photo. Choose a JPG, PNG, or WebP up to 5 MB.",
     "Выбрать фотографию": "Choose photo",
-    "Отменить выбор": "Clear selection"
+    "Отменить выбор": "Clear selection",
+    "Использовать свою гамму": "Use custom colors",
+    "Фон обложки": "Cover background",
+    "Цвет кнопок и акцентов": "Button and accent color",
+    "Цветовая гамма категории": "Category colors",
+    "Сохранить гамму": "Save colors"
 }

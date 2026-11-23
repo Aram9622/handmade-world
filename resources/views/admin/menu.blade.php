@@ -22,6 +22,7 @@
                     <input name="slug" value="{{ old('slug') }}" placeholder="woodworking" maxlength="23" required>
                 </label>
             </div>
+            @include('admin.category-palette-fields')
             <button class="button small admin-menu-create" type="submit">{{ __('Создать категорию') }}</button>
         </fieldset>
     </form>

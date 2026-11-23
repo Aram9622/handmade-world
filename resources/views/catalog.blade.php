@@ -14,6 +14,10 @@
 @section('title', $catalogTitle.($page > 1 ? (' — '.__('страница :page', ['page' => $page])) : '').' | Handmade Work')
 @section('description', __(':catalog от независимых мастеров. Смотрите фотографии, сравнивайте цены и связывайтесь с продавцами напрямую.', ['catalog' => $catalogTitle]))
 
+@if($categoryTheme)
+    @section('category-theme', '--category-background:'.$categoryTheme['background'].';--category-accent:'.$categoryTheme['accent'].';--category-on-background:'.$categoryTheme['on_background'].';--category-on-accent:'.$categoryTheme['on_accent'])
+@endif
+
 @push('metadata')
     @if($subscriptionFeed || $search !== '' || $sort !== 'new' || ($page > 1 && $listings->isEmpty()))
         <meta name="robots" content="noindex, follow">

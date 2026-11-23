@@ -271,3 +271,7 @@
 .admin-menu-create { margin-top: 12px; }
 
 .admin-category-order input { width: 5rem; }
+
+.admin-shell .admin-palette-toggle { display: flex; align-items: center; margin: 12px 0; }
+.admin-shell .admin-palette-toggle input { width: 1.125rem; height: 1.125rem; min-height: 0; margin: 0; accent-color: var(--accent); }
+.admin-shell input[type=color] { padding: 4px; cursor: pointer; }
