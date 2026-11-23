@@ -1,16 +1,22 @@
-@extends('layout')
+@extends(!empty($adminEdit) ? 'admin.layout' : 'layout')
+@section('admin-heading', __('Редактировать изделие'))
 @section('title', ($listing ? __('Редактировать изделие') : __('Продать изделие')).' — Handmade Work')
 
 @push('metadata')
     <meta name="robots" content="noindex, follow">
     <script src="{{ asset('listing-photo-picker.js') }}" defer></script>
+    <script src="{{ asset('listing-editor.js') }}" defer></script>
 @endpush
 
-@section('content')
-<section class="panel">
-    <h1>{{ $listing ? __('Редактировать изделие') : __('Продать изделие') }}</h1>
+@section(!empty($adminEdit) ? 'admin-content' : 'content')
+<section class="{{ !empty($adminEdit) ? 'admin-panel' : 'panel listing-editor-panel' }}">
+    @if(!empty($adminEdit))
+        <a class="text-link" href="{{ route('listings.show', $listing) }}">{{ __('Открыть на витрине') }}</a>
+    @else
+        <h1>{{ $listing ? __('Редактировать изделие') : __('Продать изделие') }}</h1>
+    @endif
     @include('errors')
-    <form class="stack" action="{{ $listing ? route('listings.update', $listing) : route('listings.store') }}" method="post" enctype="multipart/form-data">
+    <form class="stack" action="{{ $listing ? route(!empty($adminEdit) ? 'admin.listings.save' : 'listings.update', $listing) : route('listings.store') }}" method="post" enctype="multipart/form-data">
         @csrf
         @if($listing)
             @method('PUT')
@@ -21,13 +27,32 @@
             <option value="{{ $key }}" @selected(old('category', $listing?->category) === $key)>{{ $categories[$key]['title'] }}</option>
         @endforeach
         </select></label>
-        <label>{{ __('Описание') }}<textarea name="description" rows="5" maxlength="2000" placeholder="{{ __('Расскажите о материалах, размере и особенностях изделия') }}" required>{{ old('description', $listing?->description) }}</textarea></label>
+        @include('listing-detail-fields')
         <label>{{ __('Цена в ₽') }}<input type="number" name="price" min="1" max="10000000" value="{{ old('price', $listing?->price) }}" required></label>
         <label>{{ __('Скидка, %') }}
             <small>{{ __('От 0 до 99. Оставьте поле пустым, чтобы убрать скидку.') }}</small>
             <input type="number" name="discount_percent" min="0" max="99" step="1" value="{{ old('discount_percent', $listing?->discount_percent) }}">
         </label>
         @include('listing-photo-picker')
+        @if($listing)
+            <fieldset class="listing-edit-section">
+                <legend>{{ __('Галерея изделия') }}</legend>
+                @if($listing->gallery)
+                    <div class="listing-gallery-edit">
+                        @foreach($listing->gallery as $image => $path)
+                            <label>
+                                <img src="{{ route('listings.gallery-photo', [$listing, $image]) }}" alt="" loading="lazy">
+                                <span><input type="checkbox" name="remove_gallery[]" value="{{ $image }}" @checked(in_array($image, (array) old('remove_gallery', []), true))> {{ __('Удалить фото') }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                @endif
+                <label>{{ __('Добавить фото в галерею') }}
+                    <small>{{ __('До :count дополнительных фото. JPG, PNG или WebP, до 5 МБ каждое.', ['count' => \App\Models\Listing::MAX_GALLERY_PHOTOS]) }}</small>
+                    <input class="listing-gallery-upload" type="file" name="gallery_photos[]" accept="image/jpeg,image/png,image/webp" multiple>
+                </label>
+            </fieldset>
+        @endif
         <label>{{ __('Город') }}
             <small>{{ __('Укажите город, если предлагаете самовывоз.') }}</small>
             <input name="city" maxlength="100" autocomplete="address-level2" value="{{ old('city', $listing?->city) }}">

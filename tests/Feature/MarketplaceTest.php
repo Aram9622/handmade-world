@@ -240,4 +240,57 @@ class MarketplaceTest extends TestCase
         $this->get('/?category=paintings&q=Пейзаж')->assertOk()
             ->assertSee('Пейзаж маслом')->assertDontSee('История раздела');
     }
+
+    public function test_an_admin_can_edit_listing_details_and_manage_the_gallery(): void
+    {
+        Storage::fake('local');
+        $owner = User::factory()->create();
+        $admin = User::factory()->create();
+        $admin->forceFill(['is_super_admin' => true])->save();
+        $data = [
+            'category' => 'textile',
+            'title' => 'Льняная скатерть',
+            'description' => 'Лён ручной работы',
+            'price' => 5000,
+            'contact_email' => $owner->email,
+        ];
+        $listing = Listing::create([...$data, 'user_id' => $owner->id, 'photo_path' => 'listings/cover.webp']);
+        $edit = route('admin.listings.edit', $listing);
+        $save = route('admin.listings.save', $listing);
+
+        $this->actingAs($owner)->get($edit)->assertForbidden();
+        $this->put($save, $data)->assertForbidden();
+        $this->actingAs($admin)->get($edit)->assertOk()
+            ->assertSee('contenteditable="true"', false)->assertSee('name="gallery_photos[]"', false);
+
+        $this->put($save, [
+            ...$data,
+            'description_html' => '<h3>Состав</h3><p><strong onclick="bad()">Лён</strong></p><script>bad()</script>',
+            'characteristics' => [['label' => 'Размер', 'value' => '120 × 160 см'], ['label' => '', 'value' => '']],
+            'gallery_photos' => [
+                new UploadedFile(public_path('images/workshop.webp'), 'photo.webp', 'image/webp', null, true),
+            ],
+        ])->assertRedirect($edit);
+        $listing->refresh();
+        $id = array_key_first($listing->gallery);
+        $path = $listing->gallery[$id];
+        Storage::disk('local')->assertExists($path);
+        $this->assertSame("Состав
+Лён", $listing->description);
+        $this->assertSame($owner->id, $listing->user_id);
+        $photo = route('listings.gallery-photo', [$listing, $id]);
+        $this->get(route('listings.show', $listing))->assertOk()
+            ->assertSee('<strong>Лён</strong>', false)->assertDontSee('bad()')
+            ->assertSee('120 × 160 см')->assertSee('data-gallery-thumb', false);
+        $this->get($photo)->assertOk()->assertHeader('Content-Type', 'image/webp');
+
+        $listing->forceFill(['hidden_at' => now()])->save();
+        $this->actingAs(User::factory()->create())->get($photo)->assertNotFound();
+        $this->actingAs($admin)->get($photo)->assertOk();
+        $this->put($save, [...$data, 'remove_gallery' => [$id], 'characteristics' => [['label' => '', 'value' => '']]])
+            ->assertRedirect($edit);
+        $this->assertSame([], $listing->refresh()->characteristics);
+        Storage::disk('local')->assertMissing($path);
+        $this->get($photo)->assertNotFound();
+    }
 }

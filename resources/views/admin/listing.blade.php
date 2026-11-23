@@ -10,6 +10,7 @@
 </td>
 <td><span class="admin-state {{ $listing->hidden_at ? 'admin-state-muted' : '' }}">{{ $listing->hidden_at ? __('Скрыто') : __('Опубликовано') }}</span></td>
 <td>
+    <a class="text-link" href="{{ route('admin.listings.edit', $listing) }}">{{ __('Редактировать') }}</a>
     <form action="{{ route('admin.listings.update', $listing) }}" method="post">
         @csrf
         @method('PATCH')

@@ -10,17 +10,21 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Listing extends Model
 {
+    public const MAX_GALLERY_PHOTOS = 6;
+
+    public const MAX_CHARACTERISTICS = 10;
+
     public const FULFILLMENT_METHODS = [
         'pickup' => 'Самовывоз',
         'delivery' => 'Доставка',
         'both' => 'Самовывоз и доставка',
     ];
 
-    protected $fillable = ['user_id', 'title', 'category', 'description', 'price', 'discount_percent', 'city', 'fulfillment_method', 'contact_email', 'contact_phone', 'photo_path'];
+    protected $fillable = ['user_id', 'title', 'category', 'description', 'description_html', 'characteristics', 'gallery', 'price', 'discount_percent', 'city', 'fulfillment_method', 'contact_email', 'contact_phone', 'photo_path'];
 
     protected $attributes = ['discount_percent' => 0];
 
-    protected $casts = ['discount_percent' => 'integer'];
+    protected $casts = ['discount_percent' => 'integer', 'characteristics' => 'array', 'gallery' => 'array'];
 
     public function scopeVisible(Builder $query): Builder
     {

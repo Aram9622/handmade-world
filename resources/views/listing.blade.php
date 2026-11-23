@@ -17,12 +17,28 @@
     <meta property="og:url" content="{{ route('listings.show', $listing) }}">
     <script type="application/ld+json">{!! \Illuminate\Support\Js::encode($product) !!}</script>
     <script src="{{ asset('listing-share.js') }}" defer></script>
+    @if(count($gallery) > 1)
+        <script src="{{ asset('listing-gallery.js') }}" defer></script>
+    @endif
 @endpush
 
 @section('content')
 <a class="text-link back" href="{{ route('catalog') }}#catalog">{{ __('К каталогу') }}</a>
 <article class="detail">
-    <img src="{{ route('listings.photo', $listing) }}" alt="{{ $listing->title }}">
+    <div class="listing-gallery" data-listing-gallery>
+        <a class="listing-gallery-main" href="{{ $gallery[0] }}" data-gallery-main>
+            <img src="{{ $gallery[0] }}" alt="{{ $listing->title }}" fetchpriority="high">
+        </a>
+        @if(count($gallery) > 1)
+            <div class="listing-gallery-thumbs" role="group" aria-label="{{ __('Галерея изделия') }}">
+                @foreach($gallery as $url)
+                    <a href="{{ $url }}" data-gallery-thumb aria-label="{{ __('Фото :number', ['number' => $loop->iteration]) }}" @if($loop->first) aria-current="true" @endif>
+                        <img src="{{ $url }}" alt="" loading="lazy">
+                    </a>
+                @endforeach
+            </div>
+        @endif
+    </div>
     <div class="detail-copy">
         <p class="category"><a class="text-link" href="{{ route('catalog', ['category' => $listing->category]) }}">{{ $categoryTitle }}</a></p>
         <h1>{{ $listing->title }}</h1>
@@ -36,11 +52,12 @@
                 <dd>{{ __(\App\Models\Listing::FULFILLMENT_METHODS[$listing->fulfillment_method] ?? 'По договорённости') }}</dd>
             </div>
         </dl>
-        <p class="description">{{ $listing->description }}</p>
-        <a class="button" href="mailto:{{ str_replace("%40", "@", rawurlencode($listing->contact_email)) }}?subject={{ rawurlencode($listing->title) }}">{{ __('Написать продавцу') }}</a>
-        @if($listing->contact_phone)
-            <p><a class="button outline" href="tel:{{ $listing->contact_phone }}">{{ __('Позвонить :phone', ['phone' => $listing->contact_phone]) }}</a></p>
-        @endif
+        <div class="listing-contact-actions">
+            <a class="button" href="mailto:{{ str_replace("%40", "@", rawurlencode($listing->contact_email)) }}?subject={{ rawurlencode($listing->title) }}">{{ __('Написать продавцу') }}</a>
+            @if($listing->contact_phone)
+                <a class="button outline" href="tel:{{ $listing->contact_phone }}">{{ __('Позвонить :phone', ['phone' => $listing->contact_phone]) }}</a>
+            @endif
+        </div>
         <p class="contact">{{ __('Договоритесь с мастером о получении и оплате.') }}</p>
         <p class="contact">{{ $listing->contact_email }}</p>
         @if($listing->hidden_at)
@@ -77,6 +94,26 @@
                 <button class="button outline" type="submit">{{ __('Снять с продажи') }}</button>
             </form>
         @endcan
+    </div>
+    <div class="listing-information">
+        <section class="listing-information-panel">
+            <h2>{{ __('Описание') }}</h2>
+            @if($listing->description_html)
+                <div class="listing-prose">{!! $listing->description_html !!}</div>
+            @else
+                <p class="description">{{ $listing->description }}</p>
+            @endif
+        </section>
+        @if($listing->characteristics)
+            <section class="listing-information-panel">
+                <h2>{{ __('Характеристики') }}</h2>
+                <dl class="listing-specifications">
+                    @foreach($listing->characteristics as $row)
+                        <div><dt>{{ $row['label'] }}</dt><dd>{{ $row['value'] }}</dd></div>
+                    @endforeach
+                </dl>
+            </section>
+        @endif
     </div>
 </article>
 @unless($listing->hidden_at)
