@@ -17,7 +17,7 @@ class Listing extends Model
     public const CURRENCIES = [
         'RUB' => ['column' => 'price', 'symbol' => '₽'],
         'AMD' => ['column' => 'price_amd', 'symbol' => '֏'],
-        'USD' => ['column' => 'price_usd', 'symbol' => 'US$'],
+        'USD' => ['column' => 'price_usd', 'symbol' => '$'],
     ];
 
     public const FULFILLMENT_METHODS = [
