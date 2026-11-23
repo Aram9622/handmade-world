@@ -1,4 +1,7 @@
-@php($categoryMenu = $storefrontMenu->get('categories', collect()))
+@php
+    $categoryMenu = $storefrontMenu->get('categories', collect())
+        ->filter(fn (array $item) => !isset($item['parameters']['category']) || isset($populatedCategories[$item['parameters']['category']]));
+@endphp
 @if($category !== '' ? $categoryMenu->isNotEmpty() : $categoryMenu->contains(fn ($item) => isset($item['parameters']['category'])))
     <div class="wrap">
         <nav class="category-nav" aria-label="{{ __('Категории каталога') }}">

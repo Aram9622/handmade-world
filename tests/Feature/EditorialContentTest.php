@@ -67,7 +67,8 @@ class EditorialContentTest extends TestCase
             'directory_title' => 'Ремесленные разделы',
         ])->assertRedirect($url);
 
-        $this->get('/')->assertOk()->assertSee('Новая обложка витрины.')->assertSee('Ремесленные разделы');
+        $this->get('/')->assertOk()->assertSee('Новая обложка витрины.');
+        $this->get($url)->assertOk()->assertSee('Ремесленные разделы');
         $this->withSession(['locale' => 'en'])->get('/')->assertOk()->assertSee('Browse new arrivals');
     }
 }
