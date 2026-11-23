@@ -65,7 +65,7 @@ class StorefrontMenuTest extends TestCase
 
         $this->withSession(['locale' => 'en'])->get('/?category=ceramics')
             ->assertOk()
-            ->assertSeeInOrder(['Clay works', 'Все категории'])
+            ->assertSeeInOrder(['Все категории', 'Clay works'])
             ->assertSee('aria-current="page" >Clay works</a>', false)
             ->assertDontSee('href="'.route('catalog', ['category' => 'jewelry']).'"', false);
 
@@ -136,5 +136,24 @@ class StorefrontMenuTest extends TestCase
             '?category=wood-craft',
             $this->get('/sitemap.xml')->assertOk()->streamedContent(),
         );
+    }
+
+    public function test_category_row_order_is_shared_by_admin_and_storefront_navigation(): void
+    {
+        $path = '/admin/catalog/categories/textile/order';
+        $this->actingAs(User::factory()->create())->patch($path, ['position' => 0])->assertForbidden();
+
+        $admin = User::factory()->create();
+        $admin->forceFill(['is_super_admin' => true])->save();
+        $this->actingAs($admin)->patchJson($path, ['position' => -1])
+            ->assertUnprocessable()->assertJsonValidationErrors('position');
+        $this->patch($path, ['position' => 0])->assertRedirect('/admin/menu#catalog-category-textile');
+
+        $this->get('/admin/menu')->assertOk()
+            ->assertSeeInOrder(['id="catalog-category-textile"', 'id="catalog-category-ceramics"'], false);
+        foreach (['/', '/?category=ceramics'] as $url) {
+            $this->get($url)->assertOk()
+                ->assertSeeInOrder(['class="category-nav"', 'Все категории', '>Текстиль</a>', '>Керамика</a>'], false);
+        }
     }
 }

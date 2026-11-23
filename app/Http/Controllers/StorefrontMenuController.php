@@ -15,12 +15,13 @@ use Illuminate\View\View;
 
 class StorefrontMenuController extends Controller
 {
-    public function edit(StorefrontMenu $menu, CatalogCategories $categories): View
+    public function edit(StorefrontMenu $menu): View
     {
+        $items = $menu->items(includeRemoved: true);
         return view('admin.menu', [
-            'items' => $menu->items()->where('area', '!=', 'categories'),
+            'items' => $items->where('area', '!=', 'categories')->where('removed', false),
             'languages' => SetLocale::LANGUAGES,
-            'categories' => $categories->names(app()->getLocale()),
+            'categories' => $items->filter(fn (array $item) => isset($item['parameters']['category'])),
         ]);
     }
 
@@ -72,6 +73,16 @@ class StorefrontMenuController extends Controller
         }
 
         return to_route('admin.menu.edit')->withFragment('catalog-category-'.$data['slug'])->with('status', __('Категория создана.'));
+    }
+
+    public function orderCategory(Request $request, string $category, StorefrontMenu $menu): RedirectResponse
+    {
+        $data = $request->validate(['position' => ['required', 'integer', 'between:0,999']]);
+
+        $menu->setCategoryPosition($category, (int) $data['position']);
+
+        return to_route('admin.menu.edit')->withFragment('catalog-category-'.$category)
+            ->with('status', __('Изменения сохранены.'));
     }
 
     public function deleteCategory(string $category, CatalogCategories $categories): RedirectResponse

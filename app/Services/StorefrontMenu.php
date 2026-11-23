@@ -61,6 +61,17 @@ class StorefrontMenu
         ])->groupBy('area', preserveKeys: true);
     }
 
+    public function setCategoryPosition(string $category, int $position): void
+    {
+        $this->categories->withExistingCategory($category, function () use ($category, $position): void {
+            $key = 'category_'.$category;
+            $item = $this->items(includeRemoved: true)->get($key);
+            $item['position'] = $position;
+
+            DB::table('storefront_menu_items')->upsert([$this->row($key, $item)], ['key'], ['position']);
+        });
+    }
+
     public function setCategoryRemoved(string $key, bool $removed): void
     {
         $item = $this->items(includeRemoved: true)->get($key);
