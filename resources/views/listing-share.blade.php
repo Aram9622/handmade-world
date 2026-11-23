@@ -1,5 +1,5 @@
 @php
-    $url = route('listings.show', $listing);
+    $url = $listing->publicUrl();
     $message = __('Продаётся: :title · :price', ['title' => $listing->title, 'price' => $listing->formattedSalePrice()]);
 @endphp
 

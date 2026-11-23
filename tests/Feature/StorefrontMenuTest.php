@@ -135,7 +135,7 @@ class StorefrontMenuTest extends TestCase
         $viewer = User::factory()->create();
         $this->actingAs($viewer)->put('/categories/wood-craft/subscription')->assertRedirect();
         $this->get('/subscriptions')->assertOk()->assertSee('Carved tray');
-        $this->get('/items/'.Listing::sole()->id)->assertOk()->assertSee('Wood crafts');
+        $this->get(Listing::sole()->publicUrl())->assertOk()->assertSee('Wood crafts');
         $this->assertStringContainsString(
             '?category=wood-craft',
             $this->get('/sitemap.xml')->assertOk()->streamedContent(),

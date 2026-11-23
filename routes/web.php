@@ -20,7 +20,8 @@ Route::get('/', [ListingController::class, 'index'])->name('catalog');
 Route::get('/items/{listing}/photo', [ListingController::class, 'photo'])->name('listings.photo');
 Route::get('/items/{listing}/gallery/{image}', [ListingController::class, 'photo'])
     ->where('image', '[a-zA-Z0-9]{24}')->name('listings.gallery-photo');
-Route::get('/items/{listing}', [ListingController::class, 'show'])->name('listings.show');
+Route::get('/items/{listingSlug}', [ListingController::class, 'show'])
+    ->where('listingSlug', '[a-z0-9-]+')->name('listings.show');
 
 Route::middleware('guest')->group(function () {
     Route::view('/login', 'account', ['register' => false])->name('login');

@@ -316,5 +316,8 @@
     "Цены": "Prices",
     "Укажите цену хотя бы в одной валюте.": "Enter a price in at least one currency.",
     "Цены в других валютах": "Prices in other currencies",
-    "Похожие изделия": "Similar items"
+    "Похожие изделия": "Similar items",
+    "Метаданные категории": "Category metadata",
+    "SEO-заголовок": "SEO title",
+    "SEO-описание": "SEO description"
 }

@@ -67,6 +67,19 @@
 
         @if($page !== 'home')
             <section class="admin-panel">
+                <h2>{{ __('Метаданные категории') }}</h2>
+                <div class="admin-editor-fields">
+                    <label class="editor-wide">{{ __('SEO-заголовок') }}
+                        <input name="seo_title" maxlength="70" value="{{ old('seo_title', $content['seo_title'] ?? '') }}">
+                    </label>
+                    <label class="editor-wide">{{ __('SEO-описание') }}
+                        <textarea name="seo_description" rows="2" maxlength="160">{{ old('seo_description', $content['seo_description'] ?? '') }}</textarea>
+                    </label>
+                </div>
+            </section>
+
+
+            <section class="admin-panel">
                 <h2>{{ __('Хронология') }}</h2>
                 <p>{{ __('Оставьте все поля строки пустыми, чтобы убрать её со страницы.') }}</p>
                 @foreach(range(0, 5) as $index)

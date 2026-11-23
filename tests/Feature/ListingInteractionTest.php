@@ -16,7 +16,7 @@ class ListingInteractionTest extends TestCase
     {
         $listing = $this->listing();
         $buyer = User::factory()->create();
-        $url = route('listings.show', $listing);
+        $url = $listing->publicUrl();
         $like = route('listings.like', $listing);
 
         $this->put($like)->assertRedirect(route('login'));
@@ -37,7 +37,7 @@ class ListingInteractionTest extends TestCase
     {
         $listing = $this->listing();
         $buyer = User::factory()->create(['name' => 'Покупатель']);
-        $url = route('listings.show', $listing);
+        $url = $listing->publicUrl();
         $commentUrl = route('listings.comment', $listing);
 
         $this->post($commentUrl, ['comment' => 'Вопрос'])->assertRedirect(route('login'));

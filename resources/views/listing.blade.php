@@ -9,12 +9,12 @@
     @if($listing->hidden_at)
         <meta name="robots" content="noindex">
     @endif
-    <link rel="canonical" href="{{ route('listings.show', $listing) }}">
+    <link rel="canonical" href="{{ $listing->publicUrl() }}">
     <meta property="og:type" content="website">
     <meta property="og:title" content="{{ $listing->title }}">
     <meta property="og:description" content="{{ $description }}">
     <meta property="og:image" content="{{ route('listings.photo', $listing) }}">
-    <meta property="og:url" content="{{ route('listings.show', $listing) }}">
+    <meta property="og:url" content="{{ $listing->publicUrl() }}">
     <script type="application/ld+json">{!! \Illuminate\Support\Js::encode($product) !!}</script>
     <script src="{{ asset('listing-share.js') }}" defer></script>
     <script src="{{ asset('listing-gallery.js') }}" defer></script>

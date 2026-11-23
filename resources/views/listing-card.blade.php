@@ -1,5 +1,5 @@
 <article class="card" data-reveal>
-    <a href="{{ route('listings.show', $listing) }}">
+    <a href="{{ $listing->publicUrl() }}">
         <div class="card-photo">
             <img src="{{ route('listings.photo', $listing) }}" alt="{{ $listing->title }}" loading="lazy">
         </div>

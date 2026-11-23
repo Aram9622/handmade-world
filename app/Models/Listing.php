@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Listing extends Model
 {
@@ -35,6 +36,18 @@ class Listing extends Model
     public function scopeVisible(Builder $query): Builder
     {
         return $query->whereNull('hidden_at');
+    }
+
+    public function publicSlug(): string
+    {
+        $slug = rtrim(substr(Str::slug($this->title), 0, 100), '-');
+
+        return ($slug ?: 'item').'-'.$this->getKey();
+    }
+
+    public function publicUrl(array $query = []): string
+    {
+        return route('listings.show', ['listingSlug' => $this->publicSlug()] + $query);
     }
 
     public function owner(): BelongsTo

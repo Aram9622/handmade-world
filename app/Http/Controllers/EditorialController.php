@@ -42,6 +42,8 @@ class EditorialController extends Controller
             $rules['directory_title'] = ['required', 'string', 'max:140'];
         } else {
             $rules += [
+                'seo_title' => ['nullable', 'string', 'max:70'],
+                'seo_description' => ['nullable', 'string', 'max:160'],
                 'history_title' => ['required', 'string', 'max:140'],
                 'gallery_title' => ['required', 'string', 'max:140'],
                 'timeline' => ['array:0,1,2,3,4,5'],

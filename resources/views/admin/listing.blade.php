@@ -2,7 +2,7 @@
     <div class="admin-item">
         <img class="admin-thumb" src="{{ route('listings.photo', $listing) }}" alt="" loading="lazy" width="52" height="52">
         <div>
-            <a class="text-link" href="{{ route('listings.show', $listing) }}">{{ $listing->title }}</a>
+            <a class="text-link" href="{{ $listing->publicUrl() }}">{{ $listing->title }}</a>
             <p>{{ $listing->owner->name }} · {{ $listing->formattedSalePrice() }}</p>
             @if($listing->moderation_reason)<p>{{ $listing->moderation_reason }}</p>@endif
         </div>

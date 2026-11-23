@@ -77,9 +77,17 @@ class ListingController extends Controller
         return view('catalog', compact('editorial', 'listings', 'search', 'category', 'sort', 'showFeed', 'subscriptionFeed', 'subscribedCategories', 'populatedCategories', 'categoryTheme'));
     }
 
-    public function show(Request $request, Listing $listing, EditorialContent $editorial)
+    public function show(Request $request, string $listingSlug, EditorialContent $editorial)
     {
+        abort_unless(preg_match('/(?:^|-)([1-9][0-9]{0,19})$/D', $listingSlug, $matches), 404);
+        $listing = Listing::findOrFail($matches[1]);
         $this->ensureListingCanBeViewed($request, $listing);
+
+        if ($listingSlug !== $listing->publicSlug()) {
+            $status = $listing->hidden_at === null ? 301 : 302;
+
+            return redirect()->to($listing->publicUrl($request->query()), $status);
+        }
 
         $categoryTitle = $editorial->get($listing->category, app()->getLocale())['title'];
         $gallery = [route('listings.photo', $listing)];
@@ -90,7 +98,7 @@ class ListingController extends Controller
         foreach ($listing->prices() as $currency => $amount) {
             $offers[] = [
                 '@type' => 'Offer',
-                'url' => route('listings.show', $listing),
+                'url' => $listing->publicUrl(),
                 'priceCurrency' => $currency,
                 'price' => number_format($listing->salePriceInMinorUnits($amount) / 100, 2, '.', ''),
                 'availability' => 'https://schema.org/InStock',
@@ -167,7 +175,7 @@ class ListingController extends Controller
             $request->file('photo'),
         );
 
-        return to_route('listings.show', $listing)->with('status', __('Объявление опубликовано.'));
+        return redirect()->to($listing->publicUrl())->with('status', __('Объявление опубликовано.'));
     }
 
     public function update(SaveListingRequest $request, Listing $listing)
@@ -181,8 +189,11 @@ class ListingController extends Controller
         );
         abort_unless($updated, 409, __(self::CONFLICT_MESSAGE));
 
-        return to_route($request->routeIs('admin.listings.save') ? 'admin.listings.edit' : 'listings.show', $listing)
-            ->with('status', __('Изменения сохранены.'));
+        $destination = $request->routeIs('admin.listings.save')
+            ? route('admin.listings.edit', $listing)
+            : $listing->refresh()->publicUrl();
+
+        return redirect()->to($destination)->with('status', __('Изменения сохранены.'));
     }
 
     public function destroy(Listing $listing)

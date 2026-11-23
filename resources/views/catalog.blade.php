@@ -7,12 +7,15 @@
         'other' => __('Другие изделия ручной работы'),
         default => __(':category ручной работы', ['category' => $categoryName]),
     };
+    $categoryContent = $categoryName && !$subscriptionFeed ? $editorial[$category] : [];
+    $metaTitle = ($categoryContent['seo_title'] ?? '') ?: $catalogTitle;
+    $metaDescription = ($categoryContent['seo_description'] ?? '') ?: __(':catalog от независимых мастеров. Смотрите фотографии, сравнивайте цены и связывайтесь с продавцами напрямую.', ['catalog' => $catalogTitle]);
     $page = $listings->currentPage();
     $showEditorial = !$subscriptionFeed && $search === '' && $sort === 'new' && $page === 1;
     $canonicalParameters = array_filter(['category' => $category, 'page' => $page > 1 ? $page : null]);
 @endphp
-@section('title', $catalogTitle.($page > 1 ? (' — '.__('страница :page', ['page' => $page])) : '').' | Handmade Work')
-@section('description', __(':catalog от независимых мастеров. Смотрите фотографии, сравнивайте цены и связывайтесь с продавцами напрямую.', ['catalog' => $catalogTitle]))
+@section('title', $metaTitle.($page > 1 ? (' — '.__('страница :page', ['page' => $page])) : '').' | Handmade Work')
+@section('description', $metaDescription)
 
 @if($categoryTheme)
     @section('category-theme', '--category-background:'.$categoryTheme['background'].';--category-accent:'.$categoryTheme['accent'].';--category-on-background:'.$categoryTheme['on_background'].';--category-on-accent:'.$categoryTheme['on_accent'])
@@ -23,6 +26,14 @@
         <meta name="robots" content="noindex, follow">
     @else
         <link rel="canonical" href="{{ route('catalog', $canonicalParameters) }}">
+        @if($categoryContent && $page === 1)
+            <meta property="og:type" content="website">
+            <meta property="og:title" content="{{ $metaTitle }}">
+            <meta property="og:description" content="{{ $metaDescription }}">
+            <meta property="og:image" content="{{ $categoryContent['cover_url'] }}">
+            <meta property="og:url" content="{{ route('catalog', $canonicalParameters) }}">
+            <meta name="twitter:card" content="summary_large_image">
+        @endif
     @endif
 @endpush
 
