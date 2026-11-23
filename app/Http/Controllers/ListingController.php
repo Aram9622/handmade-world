@@ -26,7 +26,7 @@ class ListingController extends Controller
         $filters = $request->validate([
             'q' => ['nullable', 'string', 'max:100'],
             'category' => ['nullable', Rule::in($categories->keys())],
-            'sort' => ['nullable', Rule::in(['new', 'low', 'high'])],
+            'sort' => ['nullable', Rule::in(['new', 'low', 'high', 'low-amd', 'high-amd', 'low-usd', 'high-usd'])],
         ]);
 
         $search = trim($filters['q'] ?? '');
@@ -56,8 +56,10 @@ class ListingController extends Controller
             $query->where('category', $category);
         }
         if ($sort !== 'new') {
-            $direction = $sort === 'low' ? 'asc' : 'desc';
-            $query->orderByRaw('price * (100 - discount_percent) '.$direction);
+            [$order, $currency] = array_pad(explode('-', $sort, 2), 2, 'rub');
+            $column = Listing::CURRENCIES[strtoupper($currency)]['column'];
+            $query->orderByRaw("CASE WHEN $column IS NULL THEN 1 ELSE 0 END")
+                ->orderByRaw("$column * (100 - discount_percent) ".($order === 'low' ? 'asc' : 'desc'));
         }
 
         $listings = $query->latest('created_at')->latest('id')->paginate(12)->withQueryString();
@@ -84,6 +86,16 @@ class ListingController extends Controller
         foreach (array_keys($listing->gallery ?? []) as $image) {
             $gallery[] = route('listings.gallery-photo', [$listing, $image]);
         }
+        $offers = [];
+        foreach ($listing->prices() as $currency => $amount) {
+            $offers[] = [
+                '@type' => 'Offer',
+                'url' => route('listings.show', $listing),
+                'priceCurrency' => $currency,
+                'price' => number_format($listing->salePriceInMinorUnits($amount) / 100, 2, '.', ''),
+                'availability' => 'https://schema.org/InStock',
+            ];
+        }
         $product = [
             '@context' => 'https://schema.org',
             '@type' => 'Product',
@@ -91,13 +103,7 @@ class ListingController extends Controller
             'description' => $listing->description,
             'image' => $gallery,
             'category' => $categoryTitle,
-            'offers' => [
-                '@type' => 'Offer',
-                'url' => route('listings.show', $listing),
-                'priceCurrency' => 'RUB',
-                'price' => number_format($listing->salePriceInKopecks() / 100, 2, '.', ''),
-                'availability' => 'https://schema.org/InStock',
-            ],
+            'offers' => count($offers) === 1 ? $offers[0] : $offers,
         ];
 
         $listing->loadCount('likes');

@@ -519,3 +519,8 @@ body:has(.listing-gallery-dialog[open]){overflow:hidden}
  pointer-events:none;
 }
 .listing-gallery-close{z-index:2}
+
+.listing-price-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px}
+.listing-price-currency{display:inline-flex;align-items:baseline;flex-wrap:wrap;gap:.3rem}
+.listing-price-currency + .listing-price-currency{border-inline-start:1px solid var(--line);padding-inline-start:.45rem}
+@media(max-width:420px){.listing-price-fields{grid-template-columns:1fr}}

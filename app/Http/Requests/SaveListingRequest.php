@@ -40,7 +40,9 @@ class SaveListingRequest extends FormRequest
             'characteristics.*' => ['array:label,value'],
             'characteristics.*.label' => ['nullable', 'required_with:characteristics.*.value', 'string', 'max:80'],
             'characteristics.*.value' => ['nullable', 'required_with:characteristics.*.label', 'string', 'max:180'],
-            'price' => ['required', 'integer', 'min:1', 'max:10000000'],
+            'price' => ['nullable', 'required_without_all:price_amd,price_usd', 'integer', 'min:1', 'max:10000000'],
+            'price_amd' => ['nullable', 'integer', 'min:1', 'max:10000000'],
+            'price_usd' => ['nullable', 'integer', 'min:1', 'max:10000000'],
             'discount_percent' => ['sometimes', 'required', 'integer', 'min:0', 'max:99'],
             'city' => ['nullable', 'required_if:fulfillment_method,pickup,both', 'string', 'max:100'],
             'fulfillment_method' => ['nullable', Rule::in(array_keys(Listing::FULFILLMENT_METHODS))],
@@ -52,6 +54,11 @@ class SaveListingRequest extends FormRequest
             'remove_gallery.*' => ['required', 'string', 'regex:/\A[a-zA-Z0-9]{24}\z/', 'distinct'],
             'photo' => [$this->routeIs('listings.store') ? 'required' : 'sometimes', 'image', 'mimes:jpeg,png,webp', 'max:5120'],
         ];
+    }
+
+    public function messages(): array
+    {
+        return ['price.required_without_all' => __('Укажите цену хотя бы в одной валюте.')];
     }
 
     public function listingData(): array

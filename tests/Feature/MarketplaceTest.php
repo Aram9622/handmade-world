@@ -296,4 +296,37 @@ class MarketplaceTest extends TestCase
         Storage::disk('local')->assertMissing($path);
         $this->get($photo)->assertNotFound();
     }
+
+    public function test_a_listing_can_have_independent_prices_in_multiple_currencies(): void
+    {
+        Storage::fake('local');
+        $owner = User::factory()->create();
+        $data = [
+            'user_id' => $owner->id,
+            'category' => 'ceramics',
+            'title' => 'Чашка',
+            'description' => 'Ручная работа.',
+            'contact_email' => $owner->email,
+            'photo_path' => 'listings/cup.webp',
+        ];
+        Listing::create([...$data, 'price' => 1000, 'title' => 'Только рубли']);
+        $this->actingAs($owner)->post('/items', [
+            ...$data,
+            'price_amd' => 3000,
+            'price_usd' => 10,
+            'discount_percent' => 15,
+            'photo' => new UploadedFile(public_path('images/workshop.webp'), 'photo.webp', 'image/webp', null, true),
+        ])->assertRedirect();
+        $listing = Listing::where('title', 'Чашка')->sole();
+        $this->assertNull($listing->price);
+        $this->get(route('listings.show', $listing))->assertOk()->assertSee('2 550 ֏')->assertSee('8,50 US$');
+
+        $update = route('listings.update', $listing);
+        $this->put($update, [...$data, 'price' => '', 'price_amd' => '', 'price_usd' => ''])
+            ->assertSessionHasErrors('price');
+        $this->put($update, [...$data, 'price' => 750, 'price_amd' => 3000, 'price_usd' => 10])
+            ->assertRedirect(route('listings.show', $listing));
+        $this->get(route('listings.show', $listing))->assertOk()->assertSee('637,50 ₽')->assertSee('2 550 ֏')->assertSee('8,50 US$');
+        $this->get('/?sort=low-usd')->assertOk()->assertSeeInOrder(['Чашка', 'Только рубли']);
+    }
 }

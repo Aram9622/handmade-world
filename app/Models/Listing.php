@@ -14,13 +14,19 @@ class Listing extends Model
 
     public const MAX_CHARACTERISTICS = 10;
 
+    public const CURRENCIES = [
+        'RUB' => ['column' => 'price', 'symbol' => '₽'],
+        'AMD' => ['column' => 'price_amd', 'symbol' => '֏'],
+        'USD' => ['column' => 'price_usd', 'symbol' => 'US$'],
+    ];
+
     public const FULFILLMENT_METHODS = [
         'pickup' => 'Самовывоз',
         'delivery' => 'Доставка',
         'both' => 'Самовывоз и доставка',
     ];
 
-    protected $fillable = ['user_id', 'title', 'category', 'description', 'description_html', 'characteristics', 'gallery', 'price', 'discount_percent', 'city', 'fulfillment_method', 'contact_email', 'contact_phone', 'photo_path'];
+    protected $fillable = ['user_id', 'title', 'category', 'description', 'description_html', 'characteristics', 'gallery', 'price', 'price_amd', 'price_usd', 'discount_percent', 'city', 'fulfillment_method', 'contact_email', 'contact_phone', 'photo_path'];
 
     protected $attributes = ['discount_percent' => 0];
 
@@ -46,15 +52,37 @@ class Listing extends Model
         return $this->hasMany(ListingComment::class);
     }
 
-    public function salePriceInKopecks(): int
+    /** @return array<string, int> */
+    public function prices(): array
     {
-        return $this->price * (100 - $this->discount_percent);
+        $prices = [];
+        foreach (self::CURRENCIES as $currency => $definition) {
+            $amount = $this->{$definition['column']};
+            if ($amount !== null) {
+                $prices[$currency] = (int) $amount;
+            }
+        }
+
+        return $prices;
+    }
+
+    public function salePriceInMinorUnits(int $price): int
+    {
+        return $price * (100 - $this->discount_percent);
+    }
+
+    public function formatPrice(string $currency, int $minorUnits): string
+    {
+        return number_format($minorUnits / 100, $minorUnits % 100 === 0 ? 0 : 2, ',', ' ').' '.self::CURRENCIES[$currency]['symbol'];
     }
 
     public function formattedSalePrice(): string
     {
-        $kopecks = $this->salePriceInKopecks();
+        $prices = [];
+        foreach ($this->prices() as $currency => $amount) {
+            $prices[] = $this->formatPrice($currency, $this->salePriceInMinorUnits($amount));
+        }
 
-        return number_format($kopecks / 100, $kopecks % 100 === 0 ? 0 : 2, ',', ' ').' ₽';
+        return implode(' / ', $prices);
     }
 }
