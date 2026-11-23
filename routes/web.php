@@ -59,6 +59,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'can:manage-marketpl
     Route::delete('/menu/categories/{item}', [StorefrontMenuController::class, 'removeCategory'])
         ->where('item', 'category_[a-z][a-z0-9-]{0,22}')->name('menu.categories.destroy');
     Route::patch('/catalog/categories/order', [StorefrontMenuController::class, 'orderCategories'])->name('catalog.categories.order');
+    Route::patch('/catalog/categories/{category}/palette/{language}', [StorefrontMenuController::class, 'updateCategoryPalette'])
+        ->where('category', '[a-z][a-z0-9-]{0,22}')->name('catalog.categories.palette');
     Route::delete('/catalog/categories/{category}', [StorefrontMenuController::class, 'deleteCategory'])
         ->where('category', '[a-z][a-z0-9-]{0,22}')->name('catalog.categories.destroy');
     Route::get('/content/{page?}/{language?}', [EditorialController::class, 'edit'])->name('editorial.edit');

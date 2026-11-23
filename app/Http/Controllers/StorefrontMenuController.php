@@ -64,15 +64,39 @@ class StorefrontMenuController extends Controller
             ],
             'names' => ['required', "array:$locales", "required_array_keys:$locales"],
             'names.*' => ['required', 'string', 'max:80'],
+            ...$this->paletteRules($request),
         ], [], ['slug' => __('Адрес категории')]);
 
         try {
-            $categories->create($data['slug'], $data['names']);
+            $categories->create($data['slug'], $data['names'], $request->boolean('custom_palette') ? $data['palette'] : null);
         } catch (UniqueConstraintViolationException) {
             throw ValidationException::withMessages(['slug' => __('validation.unique', ['attribute' => __('Адрес категории')])]);
         }
 
         return to_route('admin.menu.edit')->withFragment('catalog-category-'.$data['slug'])->with('status', __('Категория создана.'));
+    }
+
+    public function updateCategoryPalette(Request $request, string $category, string $language, CatalogCategories $categories): RedirectResponse
+    {
+        abort_unless(isset(SetLocale::LANGUAGES[$language]), 404);
+        $data = $request->validate($this->paletteRules($request));
+        $categories->updatePalette($category, $request->boolean('custom_palette') ? $data['palette'] : null);
+
+        return to_route('admin.editorial.edit', [$category, $language])->withFragment('category-palette')
+            ->with('status', __('Изменения сохранены.'));
+    }
+
+    private function paletteRules(Request $request): array
+    {
+        $required = Rule::requiredIf($request->boolean('custom_palette'));
+        $color = [$required, 'nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/D'];
+
+        return [
+            'custom_palette' => ['sometimes', 'boolean'],
+            'palette' => [$required, 'array:background,accent'],
+            'palette.background' => $color,
+            'palette.accent' => $color,
+        ];
     }
 
     public function orderCategories(Request $request, StorefrontMenu $menu): RedirectResponse

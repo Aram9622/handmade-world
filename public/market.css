@@ -347,3 +347,14 @@ html[lang="hy"] .home-cover h1{font-size:clamp(2.5rem,5.4vw,6rem)}
 .photo-picker-enhanced .photo-picker-control:focus-within span{outline:3px solid #b4684d;outline-offset:3px}
 .photo-picker small{display:block;margin-top:8px;overflow-wrap:anywhere}
 .photo-picker #photo-status:empty{margin-top:0}
+
+.category-theme .category-cover{background:var(--category-background);color:var(--category-on-background)}
+.category-theme .category-cover .hero-copy p{color:inherit}
+.category-theme .button:not(.outline){
+ background:var(--category-accent);
+ color:var(--category-on-accent);
+}
+.category-theme .button:not(.outline):hover{border-color:var(--category-on-accent)}
+.category-theme .category-cover .button.outline{color:inherit;border-color:currentColor}
+.category-theme .category-cover .button.outline:hover{background:none;text-decoration:underline}
+.category-theme .timeline li{border-top-color:var(--category-accent)}

@@ -13,7 +13,7 @@
 <body>
 @section('body')
 @include('site-header')
-<main>
+<main @hasSection('category-theme') class="category-theme" style="@yield('category-theme')" @endif>
     @if(session('status'))
         <div class="wrap">
             <p class="notice" role="status">{{ session('status') }}</p>
