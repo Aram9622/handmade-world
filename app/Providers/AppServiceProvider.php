@@ -29,7 +29,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        View::composer(['site-header', 'category-cover'], function (\Illuminate\View\View $view): void {
+        View::composer(['site-header', 'category-nav'], function (\Illuminate\View\View $view): void {
             $view->with('storefrontMenu', $this->app->make(StorefrontMenu::class)->visible(auth()->user()));
         });
 

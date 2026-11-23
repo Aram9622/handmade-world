@@ -6,6 +6,43 @@
 @section('admin-content')
 @include('errors')
 
+<section class="admin-panel" id="category-menu">
+    <h2>{{ __('Меню категорий') }}</h2>
+    <form method="post" action="{{ route('admin.menu.categories.create') }}">
+        @csrf
+        <fieldset class="admin-menu-item">
+            <legend>{{ __('Новая категория') }}</legend>
+            <div class="admin-menu-fields">
+                @foreach($languages as $locale => $language)
+                    <label lang="{{ $locale }}">{{ $language }}
+                        <input name="names[{{ $locale }}]" value="{{ old("names.$locale") }}" maxlength="80" required>
+                    </label>
+                @endforeach
+                <label>{{ __('Адрес категории') }}
+                    <input name="slug" value="{{ old('slug') }}" placeholder="woodworking" maxlength="23" required>
+                </label>
+            </div>
+            <button class="button small admin-menu-create" type="submit">{{ __('Создать категорию') }}</button>
+        </fieldset>
+    </form>
+    <h3>{{ __('Созданные категории') }}</h3>
+    @if($categories)
+        <ul class="admin-category-list">
+            @foreach($categories as $slug => $name)
+                <li id="catalog-category-{{ $slug }}">
+                    <span><strong>{{ $name }}</strong> <small>{{ $slug }}</small></span>
+                    <div>
+                        <a class="text-link" href="{{ route('catalog', ['category' => $slug]) }}">{{ __('Открыть на витрине') }}</a>
+                        <a class="text-link" href="{{ route('admin.editorial.edit', [$slug, app()->getLocale()]) }}">{{ __('Редактировать') }}</a>
+                    </div>
+                </li>
+            @endforeach
+        </ul>
+    @else
+        <p>{{ __('Пока нет категорий.') }}</p>
+    @endif
+</section>
+
 <form class="stack" method="post" action="{{ route('admin.menu.update') }}">
     @csrf
     @method('PUT')
@@ -40,24 +77,4 @@
     <button class="button" type="submit">{{ __('Сохранить изменения') }}</button>
 </form>
 
-<section class="admin-panel" id="category-menu">
-    <h2>{{ __('Меню категорий') }}</h2>
-    <form method="post" action="{{ route('admin.menu.categories.create') }}">
-        @csrf
-        <fieldset class="admin-menu-item">
-            <legend>{{ __('Новая категория') }}</legend>
-            <div class="admin-menu-fields">
-                @foreach($languages as $locale => $language)
-                    <label lang="{{ $locale }}">{{ $language }}
-                        <input name="names[{{ $locale }}]" value="{{ old("names.$locale") }}" maxlength="80" required>
-                    </label>
-                @endforeach
-                <label>{{ __('Адрес категории') }}
-                    <input name="slug" value="{{ old('slug') }}" placeholder="woodworking" maxlength="23" required>
-                </label>
-            </div>
-            <button class="button small admin-menu-create" type="submit">{{ __('Создать категорию') }}</button>
-        </fieldset>
-    </form>
-</section>
 @endsection

@@ -15,11 +15,12 @@ use Illuminate\View\View;
 
 class StorefrontMenuController extends Controller
 {
-    public function edit(StorefrontMenu $menu): View
+    public function edit(StorefrontMenu $menu, CatalogCategories $categories): View
     {
         return view('admin.menu', [
             'items' => $menu->items()->where('area', '!=', 'categories'),
             'languages' => SetLocale::LANGUAGES,
+            'categories' => $categories->names(app()->getLocale()),
         ]);
     }
 
@@ -70,7 +71,7 @@ class StorefrontMenuController extends Controller
             throw ValidationException::withMessages(['slug' => __('validation.unique', ['attribute' => __('Адрес категории')])]);
         }
 
-        return to_route('admin.menu.edit')->withFragment('category-menu')->with('status', __('Категория создана.'));
+        return to_route('admin.menu.edit')->withFragment('catalog-category-'.$data['slug'])->with('status', __('Категория создана.'));
     }
 
     public function addCategory(Request $request, StorefrontMenu $menu): RedirectResponse

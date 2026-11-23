@@ -1,14 +1,5 @@
 <div class="category-intro">
-    @if($categoryMenu = $storefrontMenu->get('categories'))
-        <div class="wrap">
-            <nav class="category-nav" aria-label="{{ __('Категории каталога') }}">
-                @foreach($categoryMenu as $item)
-                    @php($target = $item['parameters']['category'] ?? null)
-                    <a class="text-link" href="{{ $item['href'] }}" @if($target === $category) aria-current="page" @endif>{{ $item['text'] ?? $editorial[$target]['title'] }}</a>
-                @endforeach
-            </nav>
-        </div>
-    @endif
+    @include('category-nav')
     <section class="hero editorial-hero full-cover category-cover editorial-{{ $category }}">
         <div class="hero-copy">
             <h1>{{ $categoryName }}</h1>

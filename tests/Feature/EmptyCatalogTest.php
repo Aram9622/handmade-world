@@ -17,13 +17,17 @@ class EmptyCatalogTest extends TestCase
         $admin->forceFill(['is_super_admin' => true])->save();
 
         $this->assertDatabaseCount('catalog_categories', 0);
-        $this->get('/')->assertOk()->assertDontSee('value="paintings"', false);
+        $this->get('/')->assertOk()->assertDontSee('class="category-nav"', false);
         $this->actingAs($admin)->post('/admin/menu/categories/create', [
             'slug' => 'Paintings',
             'names' => ['ru' => 'Картины и рисунки', 'hy' => 'Նկարներ', 'en' => 'Paintings and drawings'],
-        ])->assertRedirect('/admin/menu#category-menu');
+        ])->assertRedirect('/admin/menu#catalog-category-paintings');
 
         $this->assertDatabaseHas('catalog_categories', ['slug' => 'paintings']);
+        $this->get('/admin/menu')->assertOk()
+            ->assertSee('id="catalog-category-paintings"', false)
+            ->assertSeeInOrder(['Картины и рисунки', 'Открыть на витрине', 'Редактировать']);
+        $this->get('/')->assertOk()->assertSeeInOrder(['class="category-nav"', 'Картины и рисунки', 'home-cover'], false);
         $this->get('/?category=paintings')->assertOk()->assertSee('Картины и рисунки');
         $this->get('/sell')->assertOk()->assertSee('value="paintings"', false);
     }
