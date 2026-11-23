@@ -110,7 +110,7 @@ class StorefrontMenuTest extends TestCase
         ];
 
         $this->actingAs($member)->post($path, $category)->assertForbidden();
-        $this->actingAs($admin)->post($path, $category)->assertRedirect('/admin/menu#category-menu');
+        $this->actingAs($admin)->post($path, $category)->assertRedirect('/admin/menu#catalog-category-wood-craft');
         $this->postJson($path, $category)->assertUnprocessable()->assertJsonValidationErrors('slug');
         $this->postJson($path, [...$category, 'slug' => 'ceramics'])->assertUnprocessable()->assertJsonValidationErrors('slug');
         $this->get('/admin/content/wood-craft/ru')->assertOk()->assertSee('Изделия из дерева');

@@ -271,5 +271,8 @@
     "Новая категория": "New category",
     "Адрес категории": "Category URL slug",
     "Создать категорию": "Create category",
-    "Категория создана.": "Category created."
+    "Категория создана.": "Category created.",
+    "Созданные категории": "Created categories",
+    "Открыть на витрине": "Open on storefront",
+    "Пока нет категорий.": "No categories yet."
 }
