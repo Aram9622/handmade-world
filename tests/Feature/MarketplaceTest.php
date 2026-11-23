@@ -8,10 +8,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
+use Tests\WithCatalogCategories;
 
 class MarketplaceTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, WithCatalogCategories;
 
     public function test_a_maker_can_publish_and_remove_a_listing(): void
     {

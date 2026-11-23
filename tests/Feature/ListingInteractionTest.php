@@ -6,10 +6,11 @@ use App\Models\Listing;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Tests\WithCatalogCategories;
 
 class ListingInteractionTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, WithCatalogCategories;
 
     public function test_members_can_like_once_and_remove_their_own_like(): void
     {

@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\EditorialPage;
-use App\Models\Listing;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
@@ -112,7 +111,7 @@ class EditorialContent
         }
 
         $content = array_replace($content, $record?->content ?? []);
-        $content['cover_url'] = $this->imageUrl($page, $locale, 'cover', $record, $page === 'home' || isset(Listing::CATEGORIES[$page]) ? "$page.webp" : 'other.webp');
+        $content['cover_url'] = $this->imageUrl($page, $locale, 'cover', $record, $page === 'home' || $story !== [] ? "$page.webp" : 'other.webp');
 
         foreach ($content['works'] as $index => &$work) {
             $work['image_url'] = $this->imageUrl($page, $locale, "work-$index", $record, $story['works'][$index][0] ?? null);

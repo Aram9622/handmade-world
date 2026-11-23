@@ -1,21 +1,5 @@
 <?php
 
-use App\Models\Listing;
-
-$categoryItems = [
-    'category_all' => ['default_position' => 10, 'label' => 'Все категории', 'route' => 'catalog', 'area' => 'categories'],
-];
-
-foreach (Listing::CATEGORIES as $category => $label) {
-    $categoryItems['category_'.$category] = [
-        'default_position' => (count($categoryItems) + 1) * 10,
-        'label' => $label,
-        'route' => 'catalog',
-        'parameters' => ['category' => $category],
-        'area' => 'categories',
-    ];
-}
-
 return [
     'home' => ['default_position' => 10, 'label' => 'Главная', 'route' => 'catalog', 'area' => 'main'],
     'categories' => ['default_position' => 20, 'label' => 'Категории каталога', 'route' => 'catalog', 'fragment' => 'category-heading', 'area' => 'main'],
@@ -25,5 +9,5 @@ return [
     'admin' => ['default_position' => 60, 'label' => 'Админка', 'route' => 'admin.index', 'area' => 'account', 'access' => 'admin'],
     'login' => ['default_position' => 70, 'label' => 'Войти', 'route' => 'login', 'area' => 'tools', 'access' => 'guest'],
     'sell' => ['default_position' => 80, 'label' => 'Продать изделие', 'route' => 'listings.create', 'area' => 'tools'],
-    ...$categoryItems,
+    'category_all' => ['default_position' => 10, 'label' => 'Все категории', 'route' => 'catalog', 'area' => 'categories'],
 ];

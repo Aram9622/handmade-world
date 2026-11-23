@@ -10,15 +10,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Listing extends Model
 {
-    public const CATEGORIES = [
-        'paintings' => 'Картины',
-        'ceramics' => 'Керамика',
-        'jewelry' => 'Украшения',
-        'textile' => 'Текстиль',
-        'decor' => 'Декор',
-        'other' => 'Другое',
-    ];
-
     public const FULFILLMENT_METHODS = [
         'pickup' => 'Самовывоз',
         'delivery' => 'Доставка',

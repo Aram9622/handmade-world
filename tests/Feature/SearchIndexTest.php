@@ -6,10 +6,11 @@ use App\Models\Listing;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Tests\WithCatalogCategories;
 
 class SearchIndexTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, WithCatalogCategories;
 
     public function test_product_pages_expose_the_discounted_price_in_safe_structured_data(): void
     {
