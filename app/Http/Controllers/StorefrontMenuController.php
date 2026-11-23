@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Middleware\SetLocale;
-use App\Models\Listing;
 use App\Services\CatalogCategories;
 use App\Services\StorefrontMenu;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -48,16 +48,21 @@ class StorefrontMenuController extends Controller
 
     public function createCategory(Request $request, CatalogCategories $categories): RedirectResponse
     {
+        $slug = $request->input('slug');
+        if (is_string($slug)) {
+            $request->merge(['slug' => Str::slug($slug)]);
+        }
+
         $locales = implode(',', array_keys(SetLocale::LANGUAGES));
         $data = $request->validate([
             'slug' => [
                 'required', 'string', 'max:23', 'regex:/^[a-z][a-z0-9-]*$/D',
-                Rule::notIn(['home', 'all', ...array_keys(Listing::CATEGORIES)]),
+                Rule::notIn(['home', 'all']),
                 Rule::unique('catalog_categories', 'slug'),
             ],
             'names' => ['required', "array:$locales", "required_array_keys:$locales"],
             'names.*' => ['required', 'string', 'max:80'],
-        ]);
+        ], [], ['slug' => __('Адрес категории')]);
 
         try {
             $categories->create($data['slug'], $data['names']);

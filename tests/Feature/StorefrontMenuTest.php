@@ -9,10 +9,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
+use Tests\WithCatalogCategories;
 
 class StorefrontMenuTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, WithCatalogCategories;
 
     public function test_only_an_active_super_admin_can_manage_the_menu(): void
     {
@@ -27,7 +28,7 @@ class StorefrontMenuTest extends TestCase
         $admin->forceFill(['is_super_admin' => true])->save();
         $member = User::factory()->create();
         $items = [];
-        foreach (config('storefront_menu') as $key => $item) {
+        foreach (app(\App\Services\StorefrontMenu::class)->definitions() as $key => $item) {
             $items[$key] = [
                 'labels' => ['ru' => $item['label'], 'en' => $item['label'], 'hy' => $item['label']],
                 'position' => $item['default_position'],
