@@ -310,5 +310,7 @@
     "Добавить характеристику": "Add specification",
     "Увеличить фото": "Enlarge photo",
     "Закрыть просмотр фото": "Close photo viewer",
-    "Удалить фото :number": "Remove photo :number"
+    "Удалить фото :number": "Remove photo :number",
+    "Предыдущее фото": "Previous photo",
+    "Следующее фото": "Next photo"
 }
