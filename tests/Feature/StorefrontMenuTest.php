@@ -140,17 +140,25 @@ class StorefrontMenuTest extends TestCase
 
     public function test_category_row_order_is_shared_by_admin_and_storefront_navigation(): void
     {
-        $path = '/admin/catalog/categories/textile/order';
-        $this->actingAs(User::factory()->create())->patch($path, ['position' => 0])->assertForbidden();
+        $path = '/admin/catalog/categories/order';
+        $this->actingAs(User::factory()->create())->patch($path, ['positions' => ['textile' => 0]])->assertForbidden();
 
         $admin = User::factory()->create();
         $admin->forceFill(['is_super_admin' => true])->save();
-        $this->actingAs($admin)->patchJson($path, ['position' => -1])
-            ->assertUnprocessable()->assertJsonValidationErrors('position');
-        $this->patch($path, ['position' => 0])->assertRedirect('/admin/menu#catalog-category-textile');
+        $this->actingAs($admin)->patchJson($path, ['positions' => ['textile' => -1, 'ceramics' => 10]])
+            ->assertUnprocessable()->assertJsonValidationErrors('positions.textile');
+        $this->patchJson($path, ['positions' => ['textile' => 0, 'missing' => 10]])
+            ->assertUnprocessable()->assertJsonValidationErrors('positions');
+        $this->assertDatabaseCount('storefront_menu_items', 0);
+        $this->patch($path, ['positions' => ['textile' => 0, 'ceramics' => 20]])
+            ->assertRedirect('/admin/menu#category-menu');
+        $this->assertDatabaseHas('storefront_menu_items', ['key' => 'category_textile', 'position' => 0]);
+        $this->assertDatabaseHas('storefront_menu_items', ['key' => 'category_ceramics', 'position' => 20]);
 
         $this->get('/admin/menu')->assertOk()
-            ->assertSeeInOrder(['id="catalog-category-textile"', 'id="catalog-category-ceramics"'], false);
+            ->assertSeeInOrder(['id="catalog-category-textile"', 'id="catalog-category-ceramics"'], false)
+            ->assertSee('form="category-order" name="positions[textile]"', false)
+            ->assertSee('form="category-order" name="positions[ceramics]"', false);
         foreach (['/', '/?category=ceramics'] as $url) {
             $this->get($url)->assertOk()
                 ->assertSeeInOrder(['class="category-nav"', 'Все категории', '>Текстиль</a>', '>Керамика</a>'], false);

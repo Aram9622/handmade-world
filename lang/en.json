@@ -278,5 +278,6 @@
     "Удалить категорию": "Delete category",
     "Удалить категорию «:name»?": "Delete the “:name” category?",
     "Категория удалена.": "Category deleted.",
-    "Категорию используют объявления, подписки или сохранённый контент.": "The category has listings, subscriptions, or saved content."
+    "Категорию используют объявления, подписки или сохранённый контент.": "The category has listings, subscriptions, or saved content.",
+    "Сохранить порядок категорий": "Save category order"
 }
