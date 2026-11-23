@@ -75,8 +75,13 @@
         <label>{{ __('Сортировка') }}
             <select name="sort">
                 <option value="new" @selected($sort === 'new')>{{ __('Сначала новые') }}</option>
-                <option value="low" @selected($sort === 'low')>{{ __('Сначала дешевле') }}</option>
-                <option value="high" @selected($sort === 'high')>{{ __('Сначала дороже') }}</option>
+                @foreach(array_keys(\App\Models\Listing::CURRENCIES) as $currency)
+                    @php($suffix = $currency === 'RUB' ? '' : '-'.strtolower($currency))
+                    <optgroup label="{{ $currency }}">
+                        <option value="low{{ $suffix }}" @selected($sort === 'low'.$suffix)>{{ __('Сначала дешевле') }}</option>
+                        <option value="high{{ $suffix }}" @selected($sort === 'high'.$suffix)>{{ __('Сначала дороже') }}</option>
+                    </optgroup>
+                @endforeach
             </select>
         </label>
         <button class="button" type="submit">{{ __('Найти') }}</button>

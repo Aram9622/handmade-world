@@ -28,7 +28,18 @@
         @endforeach
         </select></label>
         @include('listing-detail-fields')
-        <label>{{ __('Цена в ₽') }}<input type="number" name="price" min="1" max="10000000" value="{{ old('price', $listing?->price) }}" required></label>
+        <fieldset class="listing-edit-section">
+            <legend>{{ __('Цены') }}</legend>
+            <small>{{ __('Укажите цену хотя бы в одной валюте.') }}</small>
+            <div class="listing-price-fields">
+                @foreach(\App\Models\Listing::CURRENCIES as $currency => $definition)
+                    <label>{{ $currency }} · {{ $definition['symbol'] }}
+                        <input type="number" name="{{ $definition['column'] }}" min="1" max="10000000"
+                            value="{{ old($definition['column'], $listing?->{$definition['column']}) }}">
+                    </label>
+                @endforeach
+            </div>
+        </fieldset>
         <label>{{ __('Скидка, %') }}
             <small>{{ __('От 0 до 99. Оставьте поле пустым, чтобы убрать скидку.') }}</small>
             <input type="number" name="discount_percent" min="0" max="99" step="1" value="{{ old('discount_percent', $listing?->discount_percent) }}">
