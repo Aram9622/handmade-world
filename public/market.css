@@ -547,3 +547,5 @@ body:has(.listing-gallery-dialog[open]){overflow:hidden}
 .listing-price-alternatives dt{color:var(--muted)}
 .listing-price-alternatives dd{margin:0;font-weight:650;font-variant-numeric:tabular-nums}
 .listing-price-alternatives del{margin-inline-end:.4rem}
+
+.listing-related{margin:0 0 36px}
