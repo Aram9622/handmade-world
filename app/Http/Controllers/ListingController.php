@@ -80,12 +80,16 @@ class ListingController extends Controller
         $this->ensureListingCanBeViewed($request, $listing);
 
         $categoryTitle = $editorial->get($listing->category, app()->getLocale())['title'];
+        $gallery = [route('listings.photo', $listing)];
+        foreach (array_keys($listing->gallery ?? []) as $image) {
+            $gallery[] = route('listings.gallery-photo', [$listing, $image]);
+        }
         $product = [
             '@context' => 'https://schema.org',
             '@type' => 'Product',
             'name' => $listing->title,
             'description' => $listing->description,
-            'image' => [route('listings.photo', $listing)],
+            'image' => $gallery,
             'category' => $categoryTitle,
             'offers' => [
                 '@type' => 'Offer',
@@ -102,15 +106,16 @@ class ListingController extends Controller
         $comments = $listing->comments()->whereNull('hidden_at')->with('author:id,name')->latest('id')->paginate(15, pageName: 'comments_page')
             ->fragment('comments');
 
-        return view('listing', compact('listing', 'product', 'liked', 'comments', 'categoryTitle'));
+        return view('listing', compact('listing', 'product', 'liked', 'comments', 'categoryTitle', 'gallery'));
     }
 
-    public function photo(Request $request, Listing $listing)
+    public function photo(Request $request, Listing $listing, ?string $image = null)
     {
         $this->ensureListingCanBeViewed($request, $listing);
-        abort_unless($this->photos->exists($listing->photo_path), 404);
+        $path = $image === null ? $listing->photo_path : ($listing->gallery[$image] ?? null);
+        abort_unless($path !== null && $this->photos->exists($path), 404);
 
-        return $this->photos->response($listing->photo_path, null, [
+        return $this->photos->response($path, null, [
             'Cache-Control' => 'no-cache',
             'X-Content-Type-Options' => 'nosniff',
         ]);
@@ -134,16 +139,20 @@ class ListingController extends Controller
         return view('sell', ['listing' => null, 'categories' => $editorial->all(app()->getLocale())]);
     }
 
-    public function edit(Listing $listing, EditorialContent $editorial)
+    public function edit(Request $request, Listing $listing, EditorialContent $editorial)
     {
-        return view('sell', ['listing' => $listing, 'categories' => $editorial->all(app()->getLocale())]);
+        return view('sell', [
+            'listing' => $listing,
+            'categories' => $editorial->all(app()->getLocale()),
+            'adminEdit' => $request->routeIs('admin.listings.edit'),
+        ]);
     }
 
     public function store(SaveListingRequest $request)
     {
         $listing = $this->listings->create(
             $request->user()->id,
-            $request->safe()->except('photo'),
+            $request->listingData(),
             $request->file('photo'),
         );
 
@@ -152,10 +161,17 @@ class ListingController extends Controller
 
     public function update(SaveListingRequest $request, Listing $listing)
     {
-        $updated = $this->listings->update($listing, $request->safe()->except('photo'), $request->file('photo'));
+        $updated = $this->listings->update(
+            $listing,
+            $request->listingData(),
+            $request->file('photo'),
+            $request->file('gallery_photos', []),
+            $request->validated('remove_gallery', []),
+        );
         abort_unless($updated, 409, __(self::CONFLICT_MESSAGE));
 
-        return to_route('listings.show', $listing)->with('status', __('Изменения сохранены.'));
+        return to_route($request->routeIs('admin.listings.save') ? 'admin.listings.edit' : 'listings.show', $listing)
+            ->with('status', __('Изменения сохранены.'));
     }
 
     public function destroy(Listing $listing)

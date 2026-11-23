@@ -18,6 +18,8 @@ Route::get('/sitemap.xml', [SearchIndexController::class, 'sitemap'])->name('sit
 
 Route::get('/', [ListingController::class, 'index'])->name('catalog');
 Route::get('/items/{listing}/photo', [ListingController::class, 'photo'])->name('listings.photo');
+Route::get('/items/{listing}/gallery/{image}', [ListingController::class, 'photo'])
+    ->where('image', '[a-zA-Z0-9]{24}')->name('listings.gallery-photo');
 Route::get('/items/{listing}', [ListingController::class, 'show'])->name('listings.show');
 
 Route::middleware('guest')->group(function () {
@@ -66,6 +68,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'can:manage-marketpl
     Route::get('/content/{page?}/{language?}', [EditorialController::class, 'edit'])->name('editorial.edit');
     Route::put('/content/{page}/{language}', [EditorialController::class, 'update'])->name('editorial.update');
     Route::patch('/users/{user}', [AdminController::class, 'account'])->name('users.update');
+    Route::get('/listings/{listing}/edit', [ListingController::class, 'edit'])->name('listings.edit');
+    Route::put('/listings/{listing}/edit', [ListingController::class, 'update'])->middleware('throttle:10,1')->name('listings.save');
     Route::patch('/listings/{listing}', [AdminController::class, 'listing'])->name('listings.update');
     Route::patch('/comments/{comment}', [AdminController::class, 'comment'])->name('comments.update');
 });
