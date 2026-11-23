@@ -112,7 +112,12 @@ class ListingController extends Controller
         $comments = $listing->comments()->whereNull('hidden_at')->with('author:id,name')->latest('id')->paginate(15, pageName: 'comments_page')
             ->fragment('comments');
 
-        return view('listing', compact('listing', 'product', 'liked', 'comments', 'categoryTitle', 'gallery'));
+        $relatedListings = $listing->hidden_at === null
+            ? Listing::visible()->where('category', $listing->category)->whereKeyNot($listing->id)
+                ->latest('created_at')->latest('id')->limit(3)->get()
+            : collect();
+
+        return view('listing', compact('listing', 'product', 'liked', 'comments', 'categoryTitle', 'gallery', 'relatedListings'));
     }
 
     public function photo(Request $request, Listing $listing, ?string $image = null)

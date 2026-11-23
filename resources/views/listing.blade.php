@@ -137,6 +137,21 @@
         @endif
     </div>
 </article>
+@if($relatedListings->isNotEmpty())
+    <section class="listing-related" aria-labelledby="related-listing-heading">
+        <h2 id="related-listing-heading">{{ __('Похожие изделия') }}</h2>
+        <div class="grid">
+            @foreach($relatedListings as $related)
+                @include('listing-card', [
+                    'listing' => $related,
+                    'cardCategory' => $categoryTitle,
+                    'heading' => 'h3',
+                    'showPublishedDate' => false,
+                ])
+            @endforeach
+        </div>
+    </section>
+@endif
 @unless($listing->hidden_at)
     @include('listing-comments')
 @endunless

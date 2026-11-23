@@ -92,24 +92,11 @@
     </div>
     <div class="grid">
         @forelse($listings as $listing)
-            <article class="card" data-reveal>
-                <a href="{{ route('listings.show', $listing) }}">
-                    <div class="card-photo">
-                        <img src="{{ route('listings.photo', $listing) }}" alt="{{ $listing->title }}" loading="lazy">
-                    </div>
-                    <div class="card-copy">
-                        <span>{{ $editorial[$listing->category]['title'] }}</span>
-                        <h4>{{ $listing->title }}</h4>
-                        <strong>@include('listing-price')</strong>
-                        @if($listing->city)
-                            <p class="contact">{{ $listing->city }}</p>
-                        @endif
-                        @if($showFeed && $listing->created_at)
-                            <time class="published-date" datetime="{{ $listing->created_at->toAtomString() }}">{{ $listing->created_at->locale(app()->getLocale())->isoFormat('LL') }}</time>
-                        @endif
-                    </div>
-                </a>
-            </article>
+            @include('listing-card', [
+                'cardCategory' => $editorial[$listing->category]['title'],
+                'heading' => 'h4',
+                'showPublishedDate' => $showFeed,
+            ])
         @empty
             <div class="empty">
                 @if($subscriptionFeed && !$subscribedCategories)

@@ -334,4 +334,32 @@ class MarketplaceTest extends TestCase
             ->assertSee('8,50 $', false);
         $this->withSession(['locale' => 'ru'])->get('/?sort=low-usd')->assertOk()->assertSeeInOrder(['Чашка', 'Только рубли']);
     }
+
+    public function test_listing_recommendations_show_only_recent_public_items_from_the_same_category(): void
+    {
+        $seller = User::factory()->create();
+        $data = [
+            'user_id' => $seller->id,
+            'category' => 'ceramics',
+            'price' => 1200,
+            'description' => 'Ручная работа.',
+            'contact_email' => $seller->email,
+            'photo_path' => 'listings/example.webp',
+        ];
+        $listing = Listing::create([...$data, 'title' => 'Исходное изделие']);
+        $url = route('listings.show', $listing);
+        $this->get($url)->assertOk()->assertDontSee('Похожие изделия');
+
+        foreach (['Старая чашка', 'Чайник', 'Ваза', 'Новая кружка'] as $title) {
+            Listing::create([...$data, 'title' => $title]);
+        }
+        $hidden = Listing::create([...$data, 'title' => 'Скрытая чашка']);
+        $hidden->forceFill(['hidden_at' => now()])->save();
+        Listing::create([...$data, 'category' => 'paintings', 'title' => 'Пейзаж']);
+
+        $this->get($url)->assertOk()
+            ->assertSeeInOrder(['Похожие изделия', 'Новая кружка', 'Ваза', 'Чайник'])
+            ->assertDontSee('Старая чашка')->assertDontSee('Скрытая чашка')->assertDontSee('Пейзаж')
+            ->assertDontSee('<h3>Исходное изделие</h3>', false);
+    }
 }
