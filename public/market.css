@@ -480,3 +480,40 @@ body:has(.listing-gallery-dialog[open]){overflow:hidden}
 .gallery-remove-photo input:focus-visible ~ .gallery-remove-icon{outline:2px solid var(--accent);outline-offset:2px}
 .gallery-remove-photo input:checked ~ img{opacity:.38}
 .gallery-remove-photo input:checked ~ .gallery-remove-icon{background:#8d3028;color:#fff;border-color:#8d3028}
+
+.listing-gallery-stage{position:relative}
+.listing-gallery [data-gallery-swipe]{touch-action:pan-y pinch-zoom}
+.listing-gallery-controls[hidden]{display:none}
+.listing-gallery-arrow,.listing-gallery-counter{
+ position:absolute;
+ z-index:1;
+ color:#fff;
+ background:#28231fe8;
+ border:1px solid #ffffff42;
+ box-shadow:0 3px 12px #211c1830;
+}
+.listing-gallery-arrow{
+ top:50%;
+ transform:translateY(-50%);
+ display:grid;
+ place-items:center;
+ width:44px;
+ height:44px;
+ padding:0;
+ border-radius:50%;
+ cursor:pointer;
+}
+.listing-gallery-arrow:hover{background:var(--accent-dark)}
+.listing-gallery-prev{left:10px}
+.listing-gallery-next{right:10px}
+.listing-gallery-counter{
+ bottom:10px;
+ left:50%;
+ transform:translateX(-50%);
+ border-radius:99px;
+ padding:.24rem .65rem;
+ font-size:.8rem;
+ font-variant-numeric:tabular-nums;
+ pointer-events:none;
+}
+.listing-gallery-close{z-index:2}

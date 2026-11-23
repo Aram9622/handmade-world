@@ -24,19 +24,27 @@
 <a class="text-link back" href="{{ route('catalog') }}#catalog">{{ __('К каталогу') }}</a>
 <article class="detail">
     <div class="listing-gallery" data-listing-gallery>
-        <a class="listing-gallery-main" href="{{ $gallery[0] }}" data-gallery-main aria-label="{{ __('Увеличить фото') }}">
-            <img src="{{ $gallery[0] }}" alt="{{ $listing->title }}" fetchpriority="high">
-            <span class="listing-gallery-zoom" aria-hidden="true">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M8 4H4v4m12-4h4v4M4 16v4h4m12-4v4h-4"/>
-                </svg>
-            </span>
-        </a>
+        <div class="listing-gallery-stage" data-gallery-swipe>
+            <a class="listing-gallery-main" href="{{ $gallery[0] }}" data-gallery-main aria-label="{{ __('Увеличить фото') }}">
+                <img src="{{ $gallery[0] }}" alt="{{ $listing->title }}" fetchpriority="high">
+                <span class="listing-gallery-zoom" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M8 4H4v4m12-4h4v4M4 16v4h4m12-4v4h-4"/>
+                    </svg>
+                </span>
+            </a>
+            @if(count($gallery) > 1)
+                @include('listing-gallery-controls')
+            @endif
+        </div>
         <dialog class="listing-gallery-dialog" data-gallery-dialog aria-label="{{ __('Галерея изделия') }}">
             <form method="dialog">
                 <button class="listing-gallery-close" type="submit" aria-label="{{ __('Закрыть просмотр фото') }}" autofocus>×</button>
             </form>
-            <img alt="{{ $listing->title }}">
+            <img alt="{{ $listing->title }}" data-gallery-swipe>
+            @if(count($gallery) > 1)
+                @include('listing-gallery-controls')
+            @endif
         </dialog>
         @if(count($gallery) > 1)
             <div class="listing-gallery-thumbs" role="group" aria-label="{{ __('Галерея изделия') }}">
