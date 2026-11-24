@@ -14,7 +14,10 @@ html:has(body > .header){scroll-padding-top:77px}
  border-bottom:1px solid var(--line);
  box-shadow:0 2px 12px #28231f0d;
 }
-.footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px}
+.footer-copy{display:grid;gap:3px}
+.footer-links{display:flex;flex-wrap:wrap;gap:.45rem 1rem;font-weight:650}
+.footer-links a:hover{text-decoration:underline;text-underline-offset:.2em}
 .brand{display:inline-flex;align-items:center;gap:7px;font:700 1.35rem Georgia,serif;white-space:nowrap}
 .brand em,.hero h1 em{color:var(--accent)}
 .mark{font:1.5rem/1 system-ui,sans-serif;color:var(--accent);margin-right:3px}
@@ -79,7 +82,7 @@ small{font-weight:400;color:var(--muted);font-size:.88rem}
  .brand{font-size:1.05rem;gap:4px}
  .button.small{padding:8px;font-size:.8rem}
  .filters,.grid{grid-template-columns:1fr}
- .footer .wrap{align-items:flex-start;flex-direction:column;gap:4px}
+ .footer .wrap{align-items:flex-start;flex-direction:column;gap:12px}
 }
 
 
@@ -259,7 +262,11 @@ html[lang="hy"] .home-cover h1{font-size:clamp(2.5rem,5.4vw,6rem)}
 .header .header-popover{max-height:calc(100dvh - 85px);overflow:auto}
 .storefront-popover{max-width:min(24rem,calc(100vw - 36px))}
 .storefront-popover a{white-space:normal;overflow-wrap:anywhere}
+.storefront-menu-guest,.storefront-menu .menu-lines,.storefront-mobile-links{display:none}
 @media(max-width:1024px){
+ .storefront-menu-guest,.storefront-menu .menu-lines{display:block}
+ .storefront-mobile-links{display:contents}
+ .storefront-account-label{display:none}
  html:has(body > .header){scroll-padding-top:71px}
  .site-bar{grid-template-columns:minmax(0,1fr) auto;gap:12px;min-height:70px}
  .site-links{display:none}

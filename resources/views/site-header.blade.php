@@ -12,10 +12,13 @@
                 <a class="{{ $key === 'sell' ? 'button small site-sell' : 'site-login text-link' }}" href="{{ $item['href'] }}">{{ $item['text'] }}</a>
             @endforeach
             @if(auth()->check() || $storefrontMenu->hasAny(['main', 'tools', 'account']))
-                <details class="header-menu">
-                    <summary class="header-control" aria-label="{{ __('Меню') }}"><span class="menu-lines" aria-hidden="true"></span></summary>
+                <details class="header-menu storefront-menu @guest storefront-menu-guest @endguest">
+                    <summary class="header-control" aria-label="{{ __('Меню') }}">
+                        <span class="menu-lines" aria-hidden="true"></span>
+                        @auth <span class="storefront-account-label">{{ __('Аккаунт') }}</span> @endauth
+                    </summary>
                     <nav class="header-popover storefront-popover" aria-label="{{ __('Меню') }}">
-                        @include('site-links')
+                        <div class="storefront-mobile-links">@include('site-links')</div>
                         @foreach($storefrontMenu->get('account', []) as $item)
                             <a href="{{ $item['href'] }}">{{ $item['text'] }}</a>
                         @endforeach
@@ -25,9 +28,11 @@
                                 <button type="submit">{{ __('Выйти') }}</button>
                             </form>
                         @endauth
-                        @foreach($storefrontMenu->get('tools', []) as $item)
-                            <a href="{{ $item['href'] }}">{{ $item['text'] }}</a>
-                        @endforeach
+                        <div class="storefront-mobile-links">
+                            @foreach($storefrontMenu->get('tools', []) as $item)
+                                <a href="{{ $item['href'] }}">{{ $item['text'] }}</a>
+                            @endforeach
+                        </div>
                     </nav>
                 </details>
             @endif
