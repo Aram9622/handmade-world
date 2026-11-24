@@ -24,6 +24,11 @@ class StorefrontMenuTest extends TestCase
             'Войти',
             'Продать изделие',
             '</nav>',
+            '<footer class="footer">',
+            'class="footer-links"',
+            'Главная',
+            'Каталог',
+            '</footer>',
         ], false);
     }
 
