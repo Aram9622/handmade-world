@@ -11,24 +11,26 @@
             @foreach($storefrontMenu->get('tools', []) as $key => $item)
                 <a class="{{ $key === 'sell' ? 'button small site-sell' : 'site-login text-link' }}" href="{{ $item['href'] }}">{{ $item['text'] }}</a>
             @endforeach
-            <details class="header-menu">
-                <summary class="header-control" aria-label="{{ __('Меню') }}"><span class="menu-lines" aria-hidden="true"></span></summary>
-                <nav class="header-popover" aria-label="{{ __('Меню') }}">
-                    <div class="mobile-site-links">@include('site-links')</div>
-                    @foreach($storefrontMenu->get('account', []) as $item)
-                        <a href="{{ $item['href'] }}">{{ $item['text'] }}</a>
-                    @endforeach
-                    @auth
-                        <form action="{{ route('logout') }}" method="post">
-                            @csrf
-                            <button type="submit">{{ __('Выйти') }}</button>
-                        </form>
-                    @endauth
-                    @foreach($storefrontMenu->get('tools', []) as $key => $item)
-                        <a class="mobile-{{ $key }}" href="{{ $item['href'] }}">{{ $item['text'] }}</a>
-                    @endforeach
-                </nav>
-            </details>
+            @if(auth()->check() || $storefrontMenu->hasAny(['main', 'tools', 'account']))
+                <details class="header-menu">
+                    <summary class="header-control" aria-label="{{ __('Меню') }}"><span class="menu-lines" aria-hidden="true"></span></summary>
+                    <nav class="header-popover storefront-popover" aria-label="{{ __('Меню') }}">
+                        @include('site-links')
+                        @foreach($storefrontMenu->get('account', []) as $item)
+                            <a href="{{ $item['href'] }}">{{ $item['text'] }}</a>
+                        @endforeach
+                        @auth
+                            <form action="{{ route('logout') }}" method="post">
+                                @csrf
+                                <button type="submit">{{ __('Выйти') }}</button>
+                            </form>
+                        @endauth
+                        @foreach($storefrontMenu->get('tools', []) as $item)
+                            <a href="{{ $item['href'] }}">{{ $item['text'] }}</a>
+                        @endforeach
+                    </nav>
+                </details>
+            @endif
         </div>
     </div>
 </header>
