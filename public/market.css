@@ -256,17 +256,16 @@ html[lang="hy"] .home-cover h1{font-size:clamp(2.5rem,5.4vw,6rem)}
  background:none;border:0;color:var(--ink);font:inherit;white-space:nowrap;cursor:pointer
 }
 .header-popover a:hover,.header-popover button:hover{background:var(--tint)}
-.mobile-site-links,.header-popover .mobile-sell,.header-popover .mobile-login{display:none}
 .header .header-popover{max-height:calc(100dvh - 85px);overflow:auto}
+.storefront-popover{max-width:min(24rem,calc(100vw - 36px))}
+.storefront-popover a{white-space:normal;overflow-wrap:anywhere}
 @media(max-width:1024px){
  html:has(body > .header){scroll-padding-top:71px}
  .site-bar{grid-template-columns:minmax(0,1fr) auto;gap:12px;min-height:70px}
  .site-links{display:none}
- .mobile-site-links{display:contents}
 }
 @media(max-width:570px){
  .site-sell,.site-login{display:none}
- .header-popover .mobile-sell,.header-popover .mobile-login{display:block}
 }
 
 /* Homepage collections */

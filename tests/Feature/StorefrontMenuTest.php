@@ -15,6 +15,18 @@ class StorefrontMenuTest extends TestCase
 {
     use RefreshDatabase, WithCatalogCategories;
 
+    public function test_guest_menu_contains_storefront_navigation_and_actions(): void
+    {
+        $this->get('/')->assertOk()->assertSeeInOrder([
+            'class="header-popover storefront-popover"',
+            'Главная',
+            'Каталог',
+            'Войти',
+            'Продать изделие',
+            '</nav>',
+        ], false);
+    }
+
     public function test_only_an_active_super_admin_can_manage_the_menu(): void
     {
         $this->get('/admin/menu')->assertRedirect('/login');
