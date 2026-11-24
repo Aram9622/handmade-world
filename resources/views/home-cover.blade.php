@@ -1,4 +1,3 @@
-@include('category-nav')
 <section class="hero editorial-hero full-cover home-cover">
     <div class="hero-copy">
         <h1>{{ $editorial['home']['title'] }} <em>{{ $editorial['home']['heading'] }}</em></h1>

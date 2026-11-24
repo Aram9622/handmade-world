@@ -40,7 +40,8 @@ class EmptyCatalogTest extends TestCase
             'contact_email' => $admin->email,
             'photo_path' => 'listings/example.webp',
         ]);
-        $this->get('/')->assertOk()->assertSeeInOrder(['class="category-nav"', 'Картины и рисунки', 'home-cover', 'class="category-tile"'], false)
+        $this->get('/')->assertOk()->assertDontSee('class="category-nav"', false)
+            ->assertSeeInOrder(['home-cover', 'class="category-tile"', 'Картины и рисунки'], false)
             ->assertSee('value="paintings"', false);
         $listing->forceFill(['hidden_at' => now()])->save();
         $this->get('/')->assertOk()->assertDontSee('Картины и рисунки')->assertDontSee('value="paintings"', false);

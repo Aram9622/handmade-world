@@ -2,7 +2,7 @@
     $categoryMenu = $storefrontMenu->get('categories', collect())
         ->filter(fn (array $item) => !isset($item['parameters']['category']) || isset($populatedCategories[$item['parameters']['category']]));
 @endphp
-@if($category !== '' ? $categoryMenu->isNotEmpty() : $categoryMenu->contains(fn ($item) => isset($item['parameters']['category'])))
+@if($categoryMenu->isNotEmpty())
     <div class="wrap">
         <nav class="category-nav" aria-label="{{ __('Категории каталога') }}">
             @foreach($categoryMenu->sortBy(fn (array $item) => isset($item['parameters']['category'])) as $item)
