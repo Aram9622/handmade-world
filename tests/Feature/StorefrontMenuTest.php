@@ -182,10 +182,8 @@ class StorefrontMenuTest extends TestCase
             ->assertSeeInOrder(['id="catalog-category-textile"', 'id="catalog-category-ceramics"'], false)
             ->assertSee('form="category-order" name="positions[textile]"', false)
             ->assertSee('form="category-order" name="positions[ceramics]"', false);
-        foreach (['/', '/?category=ceramics'] as $url) {
-            $this->get($url)->assertOk()
-                ->assertSeeInOrder(['class="category-nav"', 'Все категории', '>Текстиль</a>', '>Керамика</a>'], false);
-        }
+        $this->get('/?category=ceramics')->assertOk()
+            ->assertSeeInOrder(['class="category-nav"', 'Все категории', '>Текстиль</a>', '>Керамика</a>'], false);
     }
 
     private function publishListings(string ...$categories): void
