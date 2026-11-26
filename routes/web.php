@@ -52,6 +52,8 @@ Route::middleware('auth')->group(function () {
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'can:manage-marketplace'])->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('index');
+    Route::get('/prices', [AdminController::class, 'prices'])->name('prices.edit');
+    Route::put('/prices', [AdminController::class, 'updatePrices'])->name('prices.update');
     Route::get('/content/{page?}/{language?}', [EditorialController::class, 'edit'])->name('editorial.edit');
     Route::put('/content/{page}/{language}', [EditorialController::class, 'update'])->name('editorial.update');
     Route::patch('/users/{user}', [AdminController::class, 'account'])->name('users.update');

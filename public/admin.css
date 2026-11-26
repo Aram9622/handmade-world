@@ -155,6 +155,13 @@
 .admin-shell :is(input, select, textarea)[aria-invalid="true"] { border-color: #b13b57; }
 .admin-shell input::placeholder { color: var(--muted); opacity: 1; }
 
+.admin-shell input[type="checkbox"] {
+    width: auto;
+    min-height: auto;
+    margin: 0 .35rem 0 0;
+    vertical-align: middle;
+}
+
 .admin-shell input[type="file"] {
     padding: 6px;
     border-style: dashed;

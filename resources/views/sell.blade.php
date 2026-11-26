@@ -21,7 +21,7 @@
         @endforeach
         </select></label>
         <label>{{ __('Описание') }}<textarea name="description" rows="5" maxlength="2000" placeholder="{{ __('Расскажите о материалах, размере и особенностях изделия') }}" required>{{ old('description', $listing?->description) }}</textarea></label>
-        <label>{{ __('Цена в ₽') }}<input type="number" name="price" min="1" max="10000000" value="{{ old('price', $listing?->price) }}" required></label>
+        <label>{{ __('Цена в ₽') }}<input type="number" name="price" min="1" max="10000000" value="{{ old('price', $listing?->price ?? $defaultPrice ?? null) }}" required></label>
         <label>{{ __('Скидка, %') }}
             <small>{{ __('От 0 до 99. Оставьте поле пустым, чтобы убрать скидку.') }}</small>
             <input type="number" name="discount_percent" min="0" max="99" step="1" value="{{ old('discount_percent', $listing?->discount_percent) }}">

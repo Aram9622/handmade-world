@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Listing;
 use App\Models\ListingComment;
+use App\Models\MarketplaceSetting;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -90,6 +91,26 @@ class AdminController extends Controller
         }
 
         return $activity;
+    }
+
+    public function prices(): View
+    {
+        return view('admin.prices', ['settings' => MarketplaceSetting::current()]);
+    }
+
+    public function updatePrices(Request $request): RedirectResponse
+    {
+        $settings = $request->validate([
+            'use_default_price' => ['required', 'boolean'],
+            'default_price' => [Rule::requiredIf($request->boolean('use_default_price')), 'nullable', ...Listing::PRICE_RULES],
+        ]);
+
+        MarketplaceSetting::whereKey(1)->update([
+            'use_default_price' => $settings['use_default_price'],
+            'default_price' => $settings['default_price'] ?? null,
+        ]);
+
+        return to_route('admin.prices.edit')->with('status', __('Изменения сохранены.'));
     }
 
     public function account(Request $request, User $user): RedirectResponse

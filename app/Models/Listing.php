@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Listing extends Model
 {
+    public const PRICE_RULES = ['integer', 'min:1', 'max:10000000'];
+
     public const CATEGORIES = [
         'paintings' => 'Картины',
         'ceramics' => 'Керамика',

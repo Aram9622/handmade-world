@@ -26,7 +26,7 @@ class SaveListingRequest extends FormRequest
             'title' => ['required', 'string', 'max:100'],
             'category' => ['required', Rule::in(array_keys(Listing::CATEGORIES))],
             'description' => ['required', 'string', 'max:2000'],
-            'price' => ['required', 'integer', 'min:1', 'max:10000000'],
+            'price' => ['required', ...Listing::PRICE_RULES],
             'discount_percent' => ['sometimes', 'required', 'integer', 'min:0', 'max:99'],
             'city' => ['nullable', 'required_if:fulfillment_method,pickup,both', 'string', 'max:100'],
             'fulfillment_method' => ['nullable', Rule::in(array_keys(Listing::FULFILLMENT_METHODS))],
