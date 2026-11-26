@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Listing extends Model
 {
@@ -19,6 +20,14 @@ class Listing extends Model
         'textile' => 'Текстиль',
         'decor' => 'Декор',
         'other' => 'Другое',
+    public const MAX_GALLERY_PHOTOS = 6;
+
+    public const MAX_CHARACTERISTICS = 10;
+
+    public const CURRENCIES = [
+        'RUB' => ['column' => 'price', 'symbol' => '₽'],
+        'AMD' => ['column' => 'price_amd', 'symbol' => '֏'],
+        'USD' => ['column' => 'price_usd', 'symbol' => '$'],
     ];
 
     public const FULFILLMENT_METHODS = [
@@ -27,15 +36,27 @@ class Listing extends Model
         'both' => 'Самовывоз и доставка',
     ];
 
-    protected $fillable = ['user_id', 'title', 'category', 'description', 'price', 'discount_percent', 'city', 'fulfillment_method', 'contact_email', 'contact_phone', 'photo_path'];
+    protected $fillable = ['user_id', 'title', 'category', 'description', 'description_html', 'characteristics', 'gallery', 'price', 'price_amd', 'price_usd', 'discount_percent', 'city', 'fulfillment_method', 'contact_email', 'contact_phone', 'photo_path'];
 
     protected $attributes = ['discount_percent' => 0];
 
-    protected $casts = ['discount_percent' => 'integer'];
+    protected $casts = ['discount_percent' => 'integer', 'characteristics' => 'array', 'gallery' => 'array'];
 
     public function scopeVisible(Builder $query): Builder
     {
         return $query->whereNull('hidden_at');
+    }
+
+    public function publicSlug(): string
+    {
+        $slug = rtrim(substr(Str::slug($this->title), 0, 100), '-');
+
+        return ($slug ?: 'item').'-'.$this->getKey();
+    }
+
+    public function publicUrl(array $query = []): string
+    {
+        return route('listings.show', ['listingSlug' => $this->publicSlug()] + $query);
     }
 
     public function owner(): BelongsTo
@@ -53,15 +74,37 @@ class Listing extends Model
         return $this->hasMany(ListingComment::class);
     }
 
-    public function salePriceInKopecks(): int
+    /** @return array<string, int> */
+    public function prices(): array
     {
-        return $this->price * (100 - $this->discount_percent);
+        $prices = [];
+        foreach (self::CURRENCIES as $currency => $definition) {
+            $amount = $this->{$definition['column']};
+            if ($amount !== null) {
+                $prices[$currency] = (int) $amount;
+            }
+        }
+
+        return $prices;
+    }
+
+    public function salePriceInMinorUnits(int $price): int
+    {
+        return $price * (100 - $this->discount_percent);
+    }
+
+    public function formatPrice(string $currency, int $minorUnits): string
+    {
+        return number_format($minorUnits / 100, $minorUnits % 100 === 0 ? 0 : 2, ',', ' ').' '.self::CURRENCIES[$currency]['symbol'];
     }
 
     public function formattedSalePrice(): string
     {
-        $kopecks = $this->salePriceInKopecks();
+        $prices = [];
+        foreach ($this->prices() as $currency => $amount) {
+            $prices[] = $this->formatPrice($currency, $this->salePriceInMinorUnits($amount));
+        }
 
-        return number_format($kopecks / 100, $kopecks % 100 === 0 ? 0 : 2, ',', ' ').' ₽';
+        return implode(' / ', $prices);
     }
 }

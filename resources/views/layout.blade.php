@@ -13,7 +13,7 @@
 <body>
 @section('body')
 @include('site-header')
-<main>
+<main @hasSection('category-theme') class="category-theme" style="@yield('category-theme')" @endif>
     @if(session('status'))
         <div class="wrap">
             <p class="notice" role="status">{{ session('status') }}</p>
@@ -25,7 +25,7 @@
     </div>
     @yield('after-content')
 </main>
-<footer class="footer"><div class="wrap"><strong>Handmade Work</strong><span>{{ __('Площадка для мастеров и ценителей ручной работы') }}</span></div></footer>
+@include('site-footer')
 @show
 </body>
 </html>

@@ -6,10 +6,11 @@ use App\Models\Listing;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Tests\WithCatalogCategories;
 
 class AdminTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, WithCatalogCategories;
 
     public function test_admin_access_is_granted_from_the_console(): void
     {
@@ -90,7 +91,7 @@ class AdminTest extends TestCase
             'photo_path' => 'listings/cup.webp',
         ]);
         $comment = $listing->comments()->create(['user_id' => $maker->id, 'body' => 'Комментарий для проверки.']);
-        $url = route('listings.show', $listing);
+        $url = $listing->publicUrl();
 
         $this->actingAs($maker)->patch(route('admin.comments.update', $comment), ['hidden' => 1])->assertForbidden();
         $this->actingAs($admin)->from('/admin')->patch(route('admin.comments.update', $comment), ['hidden' => 1])->assertRedirect('/admin');

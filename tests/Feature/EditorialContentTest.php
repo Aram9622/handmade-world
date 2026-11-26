@@ -7,10 +7,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
+use Tests\WithCatalogCategories;
 
 class EditorialContentTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, WithCatalogCategories;
 
     public function test_only_admins_can_edit_and_publish_localized_content(): void
     {
@@ -22,6 +23,8 @@ class EditorialContentTest extends TestCase
 
         $content = [
             'title' => 'Oil paintings',
+            'seo_title' => 'Gallery & paintings',
+            'seo_description' => 'Discover "oil paintings" by local artists.',
             'heading' => 'Available works',
             'intro' => 'Paintings by independent artists.',
             'cta' => 'View listings',
@@ -41,9 +44,12 @@ class EditorialContentTest extends TestCase
         $photo = new UploadedFile(public_path('images/editorial/paintings.webp'), 'cover.webp', 'image/webp', null, true);
         $this->put($url, [...$content, 'cover' => $photo])->assertRedirect($url);
 
-        $this->get($publicUrl)->assertOk()->assertSee('Цвет, свет и жест')->assertDontSee('Oil paintings');
+        $this->get($publicUrl)->assertOk()->assertSee('Цвет, свет и жест')->assertDontSee('Oil paintings')->assertDontSee('Gallery & paintings');
         $this->withSession(['locale' => 'en'])->get($publicUrl)->assertOk()
             ->assertSee('Oil paintings')
+            ->assertSee('<title>Gallery &amp; paintings | Handmade Work</title>', false)
+            ->assertSee('<meta name="description" content="Discover &quot;oil paintings&quot; by local artists.">', false)
+            ->assertSee('<meta property="og:title" content="Gallery &amp; paintings">', false)
             ->assertSee('Timeline text.')
             ->assertSee('Gallery example')
             ->assertSee(route('editorial.image', ['paintings', 'en', 'cover']));
@@ -66,7 +72,8 @@ class EditorialContentTest extends TestCase
             'directory_title' => 'Ремесленные разделы',
         ])->assertRedirect($url);
 
-        $this->get('/')->assertOk()->assertSee('Новая обложка витрины.')->assertSee('Ремесленные разделы');
+        $this->get('/')->assertOk()->assertSee('Новая обложка витрины.');
+        $this->get($url)->assertOk()->assertSee('Ремесленные разделы');
         $this->withSession(['locale' => 'en'])->get('/')->assertOk()->assertSee('Browse new arrivals');
     }
 }

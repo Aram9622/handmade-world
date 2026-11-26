@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\SaveListingRequest;
 use App\Models\Listing;
 use App\Models\MarketplaceSetting;
+use App\Services\CatalogCategories;
 use App\Services\CategorySubscriptions;
 use App\Services\EditorialContent;
 use App\Services\ListingService;
@@ -21,12 +22,12 @@ class ListingController extends Controller
         private readonly FilesystemAdapter $photos,
     ) {}
 
-    public function index(Request $request, EditorialContent $content, CategorySubscriptions $subscriptions)
+    public function index(Request $request, EditorialContent $content, CategorySubscriptions $subscriptions, CatalogCategories $categories)
     {
         $filters = $request->validate([
             'q' => ['nullable', 'string', 'max:100'],
-            'category' => ['nullable', Rule::in(array_keys(Listing::CATEGORIES))],
-            'sort' => ['nullable', Rule::in(['new', 'low', 'high'])],
+            'category' => ['nullable', Rule::in($categories->keys())],
+            'sort' => ['nullable', Rule::in(['new', 'low', 'high', 'low-amd', 'high-amd', 'low-usd', 'high-usd'])],
         ]);
 
         $search = trim($filters['q'] ?? '');
@@ -56,8 +57,10 @@ class ListingController extends Controller
             $query->where('category', $category);
         }
         if ($sort !== 'new') {
-            $direction = $sort === 'low' ? 'asc' : 'desc';
-            $query->orderByRaw('price * (100 - discount_percent) '.$direction);
+            [$order, $currency] = array_pad(explode('-', $sort, 2), 2, 'rub');
+            $column = Listing::CURRENCIES[strtoupper($currency)]['column'];
+            $query->orderByRaw("CASE WHEN $column IS NULL THEN 1 ELSE 0 END")
+                ->orderByRaw("$column * (100 - discount_percent) ".($order === 'low' ? 'asc' : 'desc'));
         }
 
         $listings = $query->latest('created_at')->latest('id')->paginate(12)->withQueryString();
@@ -65,28 +68,51 @@ class ListingController extends Controller
 
         $editorial = $content->all(app()->getLocale());
 
-        return view('catalog', compact('editorial', 'listings', 'search', 'category', 'sort', 'showFeed', 'subscriptionFeed', 'subscribedCategories'));
+        $populatedCategories = array_intersect_key(
+            $editorial,
+            Listing::visible()->distinct()->pluck('category')->flip()->all(),
+        );
+
+        $categoryTheme = $category === '' || $subscriptionFeed ? null : $categories->theme($category);
+
+        return view('catalog', compact('editorial', 'listings', 'search', 'category', 'sort', 'showFeed', 'subscriptionFeed', 'subscribedCategories', 'populatedCategories', 'categoryTheme'));
     }
 
-    public function show(Request $request, Listing $listing, EditorialContent $editorial)
+    public function show(Request $request, string $listingSlug, EditorialContent $editorial)
     {
+        abort_unless(preg_match('/(?:^|-)([1-9][0-9]{0,19})$/D', $listingSlug, $matches), 404);
+        $listing = Listing::findOrFail($matches[1]);
         $this->ensureListingCanBeViewed($request, $listing);
 
+        if ($listingSlug !== $listing->publicSlug()) {
+            $status = $listing->hidden_at === null ? 301 : 302;
+
+            return redirect()->to($listing->publicUrl($request->query()), $status);
+        }
+
         $categoryTitle = $editorial->get($listing->category, app()->getLocale())['title'];
+        $gallery = [route('listings.photo', $listing)];
+        foreach (array_keys($listing->gallery ?? []) as $image) {
+            $gallery[] = route('listings.gallery-photo', [$listing, $image]);
+        }
+        $offers = [];
+        foreach ($listing->prices() as $currency => $amount) {
+            $offers[] = [
+                '@type' => 'Offer',
+                'url' => $listing->publicUrl(),
+                'priceCurrency' => $currency,
+                'price' => number_format($listing->salePriceInMinorUnits($amount) / 100, 2, '.', ''),
+                'availability' => 'https://schema.org/InStock',
+            ];
+        }
         $product = [
             '@context' => 'https://schema.org',
             '@type' => 'Product',
             'name' => $listing->title,
             'description' => $listing->description,
-            'image' => [route('listings.photo', $listing)],
+            'image' => $gallery,
             'category' => $categoryTitle,
-            'offers' => [
-                '@type' => 'Offer',
-                'url' => route('listings.show', $listing),
-                'priceCurrency' => 'RUB',
-                'price' => number_format($listing->salePriceInKopecks() / 100, 2, '.', ''),
-                'availability' => 'https://schema.org/InStock',
-            ],
+            'offers' => count($offers) === 1 ? $offers[0] : $offers,
         ];
 
         $listing->loadCount('likes');
@@ -95,15 +121,21 @@ class ListingController extends Controller
         $comments = $listing->comments()->whereNull('hidden_at')->with('author:id,name')->latest('id')->paginate(15, pageName: 'comments_page')
             ->fragment('comments');
 
-        return view('listing', compact('listing', 'product', 'liked', 'comments', 'categoryTitle'));
+        $relatedListings = $listing->hidden_at === null
+            ? Listing::visible()->where('category', $listing->category)->whereKeyNot($listing->id)
+                ->latest('created_at')->latest('id')->limit(3)->get()
+            : collect();
+
+        return view('listing', compact('listing', 'product', 'liked', 'comments', 'categoryTitle', 'gallery', 'relatedListings'));
     }
 
-    public function photo(Request $request, Listing $listing)
+    public function photo(Request $request, Listing $listing, ?string $image = null)
     {
         $this->ensureListingCanBeViewed($request, $listing);
-        abort_unless($this->photos->exists($listing->photo_path), 404);
+        $path = $image === null ? $listing->photo_path : ($listing->gallery[$image] ?? null);
+        abort_unless($path !== null && $this->photos->exists($path), 404);
 
-        return $this->photos->response($listing->photo_path, null, [
+        return $this->photos->response($path, null, [
             'Cache-Control' => 'no-cache',
             'X-Content-Type-Options' => 'nosniff',
         ]);
@@ -133,28 +165,42 @@ class ListingController extends Controller
         ]);
     }
 
-    public function edit(Listing $listing, EditorialContent $editorial)
+    public function edit(Request $request, Listing $listing, EditorialContent $editorial)
     {
-        return view('sell', ['listing' => $listing, 'categories' => $editorial->all(app()->getLocale())]);
+        return view('sell', [
+            'listing' => $listing,
+            'categories' => $editorial->all(app()->getLocale()),
+            'adminEdit' => $request->routeIs('admin.listings.edit'),
+        ]);
     }
 
     public function store(SaveListingRequest $request)
     {
         $listing = $this->listings->create(
             $request->user()->id,
-            $request->safe()->except('photo'),
+            $request->listingData(),
             $request->file('photo'),
         );
 
-        return to_route('listings.show', $listing)->with('status', __('Объявление опубликовано.'));
+        return redirect()->to($listing->publicUrl())->with('status', __('Объявление опубликовано.'));
     }
 
     public function update(SaveListingRequest $request, Listing $listing)
     {
-        $updated = $this->listings->update($listing, $request->safe()->except('photo'), $request->file('photo'));
+        $updated = $this->listings->update(
+            $listing,
+            $request->listingData(),
+            $request->file('photo'),
+            $request->file('gallery_photos', []),
+            $request->validated('remove_gallery', []),
+        );
         abort_unless($updated, 409, __(self::CONFLICT_MESSAGE));
 
-        return to_route('listings.show', $listing)->with('status', __('Изменения сохранены.'));
+        $destination = $request->routeIs('admin.listings.save')
+            ? route('admin.listings.edit', $listing)
+            : $listing->refresh()->publicUrl();
+
+        return redirect()->to($destination)->with('status', __('Изменения сохранены.'));
     }
 
     public function destroy(Listing $listing)

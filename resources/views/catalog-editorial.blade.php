@@ -1,11 +1,15 @@
+@if($populatedCategories)
 <section class="category-directory" aria-labelledby="category-heading">
     <h2 id="category-heading">{{ $editorial['home']['directory_title'] }}</h2>
     <div class="home-collection">
-        @foreach(\App\Models\Listing::CATEGORIES as $key => $label)
+        @foreach($populatedCategories as $key => $item)
             <a class="category-tile" data-reveal href="{{ route('catalog', ['category' => $key]) }}">
-                <img src="{{ $editorial[$key]['cover_url'] }}" alt="" loading="lazy">
-                <span>{{ $editorial[$key]['title'] }}</span>
+                <img src="{{ $item['cover_url'] }}" alt="" loading="lazy">
+                <span>{{ $item['title'] }}</span>
             </a>
         @endforeach
     </div>
 </section>
+@else
+    <div id="category-heading"></div>
+@endif

@@ -9,24 +9,61 @@
     @if($listing->hidden_at)
         <meta name="robots" content="noindex">
     @endif
-    <link rel="canonical" href="{{ route('listings.show', $listing) }}">
+    <link rel="canonical" href="{{ $listing->publicUrl() }}">
     <meta property="og:type" content="website">
     <meta property="og:title" content="{{ $listing->title }}">
     <meta property="og:description" content="{{ $description }}">
     <meta property="og:image" content="{{ route('listings.photo', $listing) }}">
-    <meta property="og:url" content="{{ route('listings.show', $listing) }}">
+    <meta property="og:url" content="{{ $listing->publicUrl() }}">
     <script type="application/ld+json">{!! \Illuminate\Support\Js::encode($product) !!}</script>
     <script src="{{ asset('listing-share.js') }}" defer></script>
+    <script src="{{ asset('listing-gallery.js') }}" defer></script>
 @endpush
 
 @section('content')
 <a class="text-link back" href="{{ route('catalog') }}#catalog">{{ __('К каталогу') }}</a>
 <article class="detail">
-    <img src="{{ route('listings.photo', $listing) }}" alt="{{ $listing->title }}">
+    <div class="listing-gallery" data-listing-gallery>
+        <div class="listing-gallery-stage" data-gallery-swipe>
+            <a class="listing-gallery-main" href="{{ $gallery[0] }}" data-gallery-main aria-label="{{ __('Увеличить фото') }}">
+                <img src="{{ $gallery[0] }}" alt="{{ $listing->title }}" fetchpriority="high">
+                <span class="listing-gallery-zoom" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M8 4H4v4m12-4h4v4M4 16v4h4m12-4v4h-4"/>
+                    </svg>
+                </span>
+            </a>
+            @if(count($gallery) > 1)
+                @include('listing-gallery-controls')
+            @endif
+        </div>
+        <dialog class="listing-gallery-dialog" data-gallery-dialog aria-label="{{ __('Галерея изделия') }}">
+            <form method="dialog">
+                <button class="listing-gallery-close" type="submit" aria-label="{{ __('Закрыть просмотр фото') }}" autofocus>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                        <path d="m6 6 12 12M18 6 6 18"/>
+                    </svg>
+                </button>
+            </form>
+            <img alt="{{ $listing->title }}" data-gallery-swipe>
+            @if(count($gallery) > 1)
+                @include('listing-gallery-controls')
+            @endif
+        </dialog>
+        @if(count($gallery) > 1)
+            <div class="listing-gallery-thumbs" role="group" aria-label="{{ __('Галерея изделия') }}">
+                @foreach($gallery as $url)
+                    <a href="{{ $url }}" data-gallery-thumb aria-label="{{ __('Фото :number', ['number' => $loop->iteration]) }}" @if($loop->first) aria-current="true" @endif>
+                        <img src="{{ $url }}" alt="" loading="lazy">
+                    </a>
+                @endforeach
+            </div>
+        @endif
+    </div>
     <div class="detail-copy">
         <p class="category"><a class="text-link" href="{{ route('catalog', ['category' => $listing->category]) }}">{{ $categoryTitle }}</a></p>
         <h1>{{ $listing->title }}</h1>
-        <p class="price">@include('listing-price')</p>
+        @include('listing-price-panel')
         <dl class="fulfillment">
             @if($listing->city)
                 <div><dt>{{ __('Город') }}</dt><dd>{{ $listing->city }}</dd></div>
@@ -36,11 +73,12 @@
                 <dd>{{ __(\App\Models\Listing::FULFILLMENT_METHODS[$listing->fulfillment_method] ?? 'По договорённости') }}</dd>
             </div>
         </dl>
-        <p class="description">{{ $listing->description }}</p>
-        <a class="button" href="mailto:{{ str_replace("%40", "@", rawurlencode($listing->contact_email)) }}?subject={{ rawurlencode($listing->title) }}">{{ __('Написать продавцу') }}</a>
-        @if($listing->contact_phone)
-            <p><a class="button outline" href="tel:{{ $listing->contact_phone }}">{{ __('Позвонить :phone', ['phone' => $listing->contact_phone]) }}</a></p>
-        @endif
+        <div class="listing-contact-actions">
+            <a class="button" href="mailto:{{ str_replace("%40", "@", rawurlencode($listing->contact_email)) }}?subject={{ rawurlencode($listing->title) }}">{{ __('Написать продавцу') }}</a>
+            @if($listing->contact_phone)
+                <a class="button outline" href="tel:{{ $listing->contact_phone }}">{{ __('Позвонить :phone', ['phone' => $listing->contact_phone]) }}</a>
+            @endif
+        </div>
         <p class="contact">{{ __('Договоритесь с мастером о получении и оплате.') }}</p>
         <p class="contact">{{ $listing->contact_email }}</p>
         @if($listing->hidden_at)
@@ -78,7 +116,42 @@
             </form>
         @endcan
     </div>
+    <div class="listing-information">
+        <section class="listing-information-panel">
+            <h2>{{ __('Описание') }}</h2>
+            @if($listing->description_html)
+                <div class="listing-prose">{!! $listing->description_html !!}</div>
+            @else
+                <p class="description">{{ $listing->description }}</p>
+            @endif
+        </section>
+        @if($listing->characteristics)
+            <section class="listing-information-panel">
+                <h2>{{ __('Характеристики') }}</h2>
+                <dl class="listing-specifications">
+                    @foreach($listing->characteristics as $row)
+                        <div><dt>{{ $row['label'] }}</dt><dd>{{ $row['value'] }}</dd></div>
+                    @endforeach
+                </dl>
+            </section>
+        @endif
+    </div>
 </article>
+@if($relatedListings->isNotEmpty())
+    <section class="listing-related" aria-labelledby="related-listing-heading">
+        <h2 id="related-listing-heading">{{ __('Похожие изделия') }}</h2>
+        <div class="grid">
+            @foreach($relatedListings as $related)
+                @include('listing-card', [
+                    'listing' => $related,
+                    'cardCategory' => $categoryTitle,
+                    'heading' => 'h3',
+                    'showPublishedDate' => false,
+                ])
+            @endforeach
+        </div>
+    </section>
+@endif
 @unless($listing->hidden_at)
     @include('listing-comments')
 @endunless

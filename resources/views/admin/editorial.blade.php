@@ -5,7 +5,6 @@
 
 @section('admin-content')
 @php
-    $pages = \App\Services\EditorialContent::PAGES;
     $languages = \App\Http\Middleware\SetLocale::LANGUAGES;
     $fields = [
         'title' => ['Название', 100],
@@ -19,7 +18,7 @@
 @endphp
     <nav class="admin-editor-tabs" aria-label="{{ __('Страницы витрины') }}">
         @foreach($pages as $key => $label)
-            <a class="text-link" href="{{ route('admin.editorial.edit', [$key, $language]) }}" @if($page === $key) aria-current="page" @endif>{{ __($label) }}</a>
+            <a class="text-link" href="{{ route('admin.editorial.edit', [$key, $language]) }}" @if($page === $key) aria-current="page" @endif>{{ $label }}</a>
         @endforeach
     </nav>
     <nav class="admin-editor-tabs" aria-label="{{ __('Язык контента') }}">
@@ -30,11 +29,21 @@
 
     @include('errors')
 
+    @if($page !== 'home')
+        <form class="admin-panel" id="category-palette" method="post" action="{{ route('admin.catalog.categories.palette', [$page, $language]) }}">
+            @csrf
+            @method('PATCH')
+            <h2>{{ __('Цветовая гамма категории') }}</h2>
+            @include('admin.category-palette-fields')
+            <button class="button small admin-menu-create" type="submit">{{ __('Сохранить гамму') }}</button>
+        </form>
+    @endif
+
     <form class="stack admin-editor" action="{{ route('admin.editorial.update', [$page, $language]) }}" method="post" enctype="multipart/form-data">
         @csrf
         @method('PUT')
         <section class="admin-panel">
-            <h2>{{ __($pages[$page]) }} · {{ $languages[$language] }}</h2>
+            <h2>{{ $pages[$page] }} · {{ $languages[$language] }}</h2>
             <div class="admin-editor-layout">
                 <div class="admin-editor-fields">
                     @foreach($fields as $name => [$label, $limit])
@@ -57,6 +66,19 @@
         </section>
 
         @if($page !== 'home')
+            <section class="admin-panel">
+                <h2>{{ __('Метаданные категории') }}</h2>
+                <div class="admin-editor-fields">
+                    <label class="editor-wide">{{ __('SEO-заголовок') }}
+                        <input name="seo_title" maxlength="70" value="{{ old('seo_title', $content['seo_title'] ?? '') }}">
+                    </label>
+                    <label class="editor-wide">{{ __('SEO-описание') }}
+                        <textarea name="seo_description" rows="2" maxlength="160">{{ old('seo_description', $content['seo_description'] ?? '') }}</textarea>
+                    </label>
+                </div>
+            </section>
+
+
             <section class="admin-panel">
                 <h2>{{ __('Хронология') }}</h2>
                 <p>{{ __('Оставьте все поля строки пустыми, чтобы убрать её со страницы.') }}</p>

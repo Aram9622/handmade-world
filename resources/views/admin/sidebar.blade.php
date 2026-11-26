@@ -6,6 +6,7 @@
         @endforeach
         <a href="{{ route('admin.editorial.edit') }}" @if(request()->routeIs('admin.editorial.*')) aria-current="page" @endif>{{ __('Контент') }}</a>
         <a href="{{ route('admin.prices.edit') }}" @if(request()->routeIs('admin.prices.*')) aria-current="page" @endif>{{ __('Цены') }}</a>
+        <a href="{{ route('admin.menu.edit') }}" @if(request()->routeIs('admin.menu.*')) aria-current="page" @endif>{{ __('Меню') }}</a>
     </nav>
     <a class="admin-storefront" href="{{ route('catalog') }}">{{ __('Открыть витрину') }}</a>
 </aside>

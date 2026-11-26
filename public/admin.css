@@ -246,3 +246,39 @@
     .activity-days time { font-size: .75rem; }
     .activity-track { height: 62px; }
 }
+
+.admin-menu-item {
+    min-width: 0;
+    margin: 1rem 0;
+    padding: 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+}
+.admin-menu-item legend { padding-inline: 6px; font-weight: 650; }
+.admin-menu-fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+    gap: 12px;
+}
+
+#category-menu { margin-bottom: 24px; }
+.admin-category-list { list-style: none; margin: .75rem 0 0; padding: 0; }
+.admin-category-list li {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: .5rem 1rem;
+    padding: .65rem .75rem;
+    border-top: 1px solid var(--line);
+    overflow-wrap: anywhere;
+    scroll-margin-top: 1rem;
+}
+.admin-category-list li:target { background: var(--tint); }
+.admin-category-list li div { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem 1rem; }
+.admin-menu-create { margin-top: 12px; }
+
+.admin-category-order input { width: 5rem; }
+
+.admin-shell .admin-palette-toggle { display: flex; align-items: center; margin: 12px 0; }
+.admin-shell .admin-palette-toggle input { width: 1.125rem; height: 1.125rem; min-height: 0; margin: 0; accent-color: var(--accent); }
+.admin-shell input[type=color] { padding: 4px; cursor: pointer; }

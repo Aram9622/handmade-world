@@ -6,16 +6,17 @@ use App\Models\Listing;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Tests\WithCatalogCategories;
 
 class ListingInteractionTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, WithCatalogCategories;
 
     public function test_members_can_like_once_and_remove_their_own_like(): void
     {
         $listing = $this->listing();
         $buyer = User::factory()->create();
-        $url = route('listings.show', $listing);
+        $url = $listing->publicUrl();
         $like = route('listings.like', $listing);
 
         $this->put($like)->assertRedirect(route('login'));
@@ -36,7 +37,7 @@ class ListingInteractionTest extends TestCase
     {
         $listing = $this->listing();
         $buyer = User::factory()->create(['name' => 'Покупатель']);
-        $url = route('listings.show', $listing);
+        $url = $listing->publicUrl();
         $commentUrl = route('listings.comment', $listing);
 
         $this->post($commentUrl, ['comment' => 'Вопрос'])->assertRedirect(route('login'));

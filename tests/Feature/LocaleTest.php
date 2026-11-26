@@ -4,10 +4,11 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Tests\WithCatalogCategories;
 
 class LocaleTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, WithCatalogCategories;
 
     public function test_language_switch_preserves_the_category_and_persists_on_other_pages(): void
     {

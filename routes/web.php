@@ -7,7 +7,7 @@ use App\Http\Controllers\EditorialController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\ListingInteractionController;
 use App\Http\Controllers\SearchIndexController;
-use App\Models\Listing;
+use App\Http\Controllers\StorefrontMenuController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/editorial-images/{page}/{language}/{slot}', [EditorialController::class, 'image'])
@@ -18,7 +18,10 @@ Route::get('/sitemap.xml', [SearchIndexController::class, 'sitemap'])->name('sit
 
 Route::get('/', [ListingController::class, 'index'])->name('catalog');
 Route::get('/items/{listing}/photo', [ListingController::class, 'photo'])->name('listings.photo');
-Route::get('/items/{listing}', [ListingController::class, 'show'])->name('listings.show');
+Route::get('/items/{listing}/gallery/{image}', [ListingController::class, 'photo'])
+    ->where('image', '[a-zA-Z0-9]{24}')->name('listings.gallery-photo');
+Route::get('/items/{listingSlug}', [ListingController::class, 'show'])
+    ->where('listingSlug', '[a-z0-9-]+')->name('listings.show');
 
 Route::middleware('guest')->group(function () {
     Route::view('/login', 'account', ['register' => false])->name('login');
@@ -30,7 +33,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/subscriptions', [ListingController::class, 'index'])->name('subscriptions.index');
     Route::controller(CategorySubscriptionController::class)
-        ->prefix('/categories/{category}/subscription')->whereIn('category', array_keys(Listing::CATEGORIES))
+        ->prefix('/categories/{category}/subscription')->where(['category' => '[a-z][a-z0-9-]{0,22}'])
         ->name('subscriptions.')->group(function () {
             Route::get('/', 'participate')->name('participate');
             Route::put('/', 'store')->name('store');
@@ -54,9 +57,22 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'can:manage-marketpl
     Route::get('/', [AdminController::class, 'index'])->name('index');
     Route::get('/prices', [AdminController::class, 'prices'])->name('prices.edit');
     Route::put('/prices', [AdminController::class, 'updatePrices'])->name('prices.update');
+    Route::get('/menu', [StorefrontMenuController::class, 'edit'])->name('menu.edit');
+    Route::put('/menu', [StorefrontMenuController::class, 'update'])->name('menu.update');
+    Route::post('/menu/categories/create', [StorefrontMenuController::class, 'createCategory'])->name('menu.categories.create');
+    Route::post('/menu/categories', [StorefrontMenuController::class, 'addCategory'])->name('menu.categories.store');
+    Route::delete('/menu/categories/{item}', [StorefrontMenuController::class, 'removeCategory'])
+        ->where('item', 'category_[a-z][a-z0-9-]{0,22}')->name('menu.categories.destroy');
+    Route::patch('/catalog/categories/order', [StorefrontMenuController::class, 'orderCategories'])->name('catalog.categories.order');
+    Route::patch('/catalog/categories/{category}/palette/{language}', [StorefrontMenuController::class, 'updateCategoryPalette'])
+        ->where('category', '[a-z][a-z0-9-]{0,22}')->name('catalog.categories.palette');
+    Route::delete('/catalog/categories/{category}', [StorefrontMenuController::class, 'deleteCategory'])
+        ->where('category', '[a-z][a-z0-9-]{0,22}')->name('catalog.categories.destroy');
     Route::get('/content/{page?}/{language?}', [EditorialController::class, 'edit'])->name('editorial.edit');
     Route::put('/content/{page}/{language}', [EditorialController::class, 'update'])->name('editorial.update');
     Route::patch('/users/{user}', [AdminController::class, 'account'])->name('users.update');
+    Route::get('/listings/{listing}/edit', [ListingController::class, 'edit'])->name('listings.edit');
+    Route::put('/listings/{listing}/edit', [ListingController::class, 'update'])->middleware('throttle:10,1')->name('listings.save');
     Route::patch('/listings/{listing}', [AdminController::class, 'listing'])->name('listings.update');
     Route::patch('/comments/{comment}', [AdminController::class, 'comment'])->name('comments.update');
 });

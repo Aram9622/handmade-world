@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Middleware\SetLocale;
 use App\Models\EditorialPage;
+use App\Services\CatalogCategories;
 use App\Services\EditorialContent;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,17 +14,21 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class EditorialController extends Controller
 {
-    public function edit(EditorialContent $editorial, string $page = 'home', string $language = 'ru'): View
+    public function edit(EditorialContent $editorial, CatalogCategories $categories, string $page = 'home', string $language = 'ru'): View
     {
-        $this->validateSelection($page, $language);
+        $this->validateSelection($editorial, $page, $language);
         $content = $editorial->get($page, $language);
 
-        return view('admin.editorial', compact('page', 'language', 'content'));
+        $pages = $editorial->pages(app()->getLocale());
+
+        $palette = $page === 'home' ? null : $categories->palette($page);
+
+        return view('admin.editorial', compact('page', 'language', 'content', 'pages', 'palette'));
     }
 
     public function update(Request $request, EditorialContent $editorial, string $page, string $language): RedirectResponse
     {
-        $this->validateSelection($page, $language);
+        $this->validateSelection($editorial, $page, $language);
         $imageRules = ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:5120'];
         $rules = [
             'title' => ['required', 'string', 'max:100'],
@@ -37,6 +42,8 @@ class EditorialController extends Controller
             $rules['directory_title'] = ['required', 'string', 'max:140'];
         } else {
             $rules += [
+                'seo_title' => ['nullable', 'string', 'max:70'],
+                'seo_description' => ['nullable', 'string', 'max:160'],
                 'history_title' => ['required', 'string', 'max:140'],
                 'gallery_title' => ['required', 'string', 'max:140'],
                 'timeline' => ['array:0,1,2,3,4,5'],
@@ -74,9 +81,9 @@ class EditorialController extends Controller
         return to_route('admin.editorial.edit', [$page, $language])->with('status', __('Изменения сохранены.'));
     }
 
-    public function image(string $page, string $language, string $slot): StreamedResponse
+    public function image(EditorialContent $editorial, string $page, string $language, string $slot): StreamedResponse
     {
-        $this->validateSelection($page, $language);
+        $this->validateSelection($editorial, $page, $language);
         $record = EditorialPage::where(['page' => $page, 'locale' => $language])->firstOrFail();
         $path = $record->images[$slot] ?? null;
         $disk = Storage::disk('local');
@@ -85,8 +92,8 @@ class EditorialController extends Controller
         return $disk->response($path, null, ['Cache-Control' => 'no-cache', 'X-Content-Type-Options' => 'nosniff']);
     }
 
-    private function validateSelection(string $page, string $language): void
+    private function validateSelection(EditorialContent $editorial, string $page, string $language): void
     {
-        abort_unless(isset(EditorialContent::PAGES[$page], SetLocale::LANGUAGES[$language]), 404);
+        abort_unless(isset(SetLocale::LANGUAGES[$language]) && isset($editorial->pages($language)[$page]), 404);
     }
 }

@@ -7,18 +7,33 @@
         'other' => __('Другие изделия ручной работы'),
         default => __(':category ручной работы', ['category' => $categoryName]),
     };
+    $categoryContent = $categoryName && !$subscriptionFeed ? $editorial[$category] : [];
+    $metaTitle = ($categoryContent['seo_title'] ?? '') ?: $catalogTitle;
+    $metaDescription = ($categoryContent['seo_description'] ?? '') ?: __(':catalog от независимых мастеров. Смотрите фотографии, сравнивайте цены и связывайтесь с продавцами напрямую.', ['catalog' => $catalogTitle]);
     $page = $listings->currentPage();
     $showEditorial = !$subscriptionFeed && $search === '' && $sort === 'new' && $page === 1;
     $canonicalParameters = array_filter(['category' => $category, 'page' => $page > 1 ? $page : null]);
 @endphp
-@section('title', $catalogTitle.($page > 1 ? (' — '.__('страница :page', ['page' => $page])) : '').' | Handmade Work')
-@section('description', __(':catalog от независимых мастеров. Смотрите фотографии, сравнивайте цены и связывайтесь с продавцами напрямую.', ['catalog' => $catalogTitle]))
+@section('title', $metaTitle.($page > 1 ? (' — '.__('страница :page', ['page' => $page])) : '').' | Handmade Work')
+@section('description', $metaDescription)
+
+@if($categoryTheme)
+    @section('category-theme', '--category-background:'.$categoryTheme['background'].';--category-accent:'.$categoryTheme['accent'].';--category-on-background:'.$categoryTheme['on_background'].';--category-on-accent:'.$categoryTheme['on_accent'])
+@endif
 
 @push('metadata')
     @if($subscriptionFeed || $search !== '' || $sort !== 'new' || ($page > 1 && $listings->isEmpty()))
         <meta name="robots" content="noindex, follow">
     @else
         <link rel="canonical" href="{{ route('catalog', $canonicalParameters) }}">
+        @if($categoryContent && $page === 1)
+            <meta property="og:type" content="website">
+            <meta property="og:title" content="{{ $metaTitle }}">
+            <meta property="og:description" content="{{ $metaDescription }}">
+            <meta property="og:image" content="{{ $categoryContent['cover_url'] }}">
+            <meta property="og:url" content="{{ route('catalog', $canonicalParameters) }}">
+            <meta name="twitter:card" content="summary_large_image">
+        @endif
     @endif
 @endpush
 
@@ -61,8 +76,8 @@
         <label>{{ __('Категория') }}
             <select name="category">
                 <option value="">{{ __('Все категории') }}</option>
-                @foreach(\App\Models\Listing::CATEGORIES as $key => $name)
-                    @if(!$subscriptionFeed || in_array($key, $subscribedCategories, true))
+                @foreach(array_diff_key($editorial, ['home' => true]) as $key => $name)
+                    @if($subscriptionFeed ? in_array($key, $subscribedCategories, true) : ($key === $category || isset($populatedCategories[$key])))
                         <option value="{{ $key }}" @selected($key === $category)>{{ $editorial[$key]['title'] }}</option>
                     @endif
                 @endforeach
@@ -71,8 +86,13 @@
         <label>{{ __('Сортировка') }}
             <select name="sort">
                 <option value="new" @selected($sort === 'new')>{{ __('Сначала новые') }}</option>
-                <option value="low" @selected($sort === 'low')>{{ __('Сначала дешевле') }}</option>
-                <option value="high" @selected($sort === 'high')>{{ __('Сначала дороже') }}</option>
+                @foreach(array_keys(\App\Models\Listing::CURRENCIES) as $currency)
+                    @php($suffix = $currency === 'RUB' ? '' : '-'.strtolower($currency))
+                    <optgroup label="{{ $currency }}">
+                        <option value="low{{ $suffix }}" @selected($sort === 'low'.$suffix)>{{ __('Сначала дешевле') }}</option>
+                        <option value="high{{ $suffix }}" @selected($sort === 'high'.$suffix)>{{ __('Сначала дороже') }}</option>
+                    </optgroup>
+                @endforeach
             </select>
         </label>
         <button class="button" type="submit">{{ __('Найти') }}</button>
@@ -83,24 +103,11 @@
     </div>
     <div class="grid">
         @forelse($listings as $listing)
-            <article class="card" data-reveal>
-                <a href="{{ route('listings.show', $listing) }}">
-                    <div class="card-photo">
-                        <img src="{{ route('listings.photo', $listing) }}" alt="{{ $listing->title }}" loading="lazy">
-                    </div>
-                    <div class="card-copy">
-                        <span>{{ $editorial[$listing->category]['title'] }}</span>
-                        <h4>{{ $listing->title }}</h4>
-                        <strong>@include('listing-price')</strong>
-                        @if($listing->city)
-                            <p class="contact">{{ $listing->city }}</p>
-                        @endif
-                        @if($showFeed && $listing->created_at)
-                            <time class="published-date" datetime="{{ $listing->created_at->toAtomString() }}">{{ $listing->created_at->locale(app()->getLocale())->isoFormat('LL') }}</time>
-                        @endif
-                    </div>
-                </a>
-            </article>
+            @include('listing-card', [
+                'cardCategory' => $editorial[$listing->category]['title'],
+                'heading' => 'h4',
+                'showPublishedDate' => $showFeed,
+            ])
         @empty
             <div class="empty">
                 @if($subscriptionFeed && !$subscribedCategories)
