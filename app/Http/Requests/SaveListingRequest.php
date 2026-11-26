@@ -35,6 +35,7 @@ class SaveListingRequest extends FormRequest
             'title' => ['required', 'string', 'max:100'],
             'category' => ['required', Rule::in($categories->keys())],
             'description' => ['required', 'string', 'max:2000'],
+            'price' => ['required', ...Listing::PRICE_RULES],
             'description_html' => ['nullable', 'string', 'max:12000'],
             'characteristics' => ['sometimes', 'array', 'max:'.Listing::MAX_CHARACTERISTICS],
             'characteristics.*' => ['array:label,value'],

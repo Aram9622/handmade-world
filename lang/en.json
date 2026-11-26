@@ -254,6 +254,9 @@
     "Подписка отменена.": "You have unfollowed this category.",
     "Подпишитесь на интересные категории, чтобы видеть новые изделия здесь.": "Follow the categories you like to see new items here.",
     "В подписках пока нет изделий по этим фильтрам.": "No items in your subscriptions match these filters yet.",
+    "Цены": "Prices",
+    "Подставлять цену по умолчанию в новых объявлениях": "Prefill the default price in new listings",
+    "Цена по умолчанию в ₽": "Default price in ₽"
     "Меню витрины": "Storefront menu",
     "Меню аккаунта": "Account menu",
     "Кнопки в шапке": "Header buttons",

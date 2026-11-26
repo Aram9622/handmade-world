@@ -27,6 +27,8 @@
             <option value="{{ $key }}" @selected(old('category', $listing?->category) === $key)>{{ $categories[$key]['title'] }}</option>
         @endforeach
         </select></label>
+        <label>{{ __('Описание') }}<textarea name="description" rows="5" maxlength="2000" placeholder="{{ __('Расскажите о материалах, размере и особенностях изделия') }}" required>{{ old('description', $listing?->description) }}</textarea></label>
+        <label>{{ __('Цена в ₽') }}<input type="number" name="price" min="1" max="10000000" value="{{ old('price', $listing?->price ?? $defaultPrice ?? null) }}" required></label>
         @include('listing-detail-fields')
         <fieldset class="listing-edit-section">
             <legend>{{ __('Цены') }}</legend>

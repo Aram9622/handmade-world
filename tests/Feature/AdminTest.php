@@ -27,6 +27,32 @@ class AdminTest extends TestCase
         $this->patch(route('admin.users.update', $user), ['suspended' => 1])->assertForbidden();
     }
 
+    public function test_admin_can_toggle_the_default_price_for_new_listings(): void
+    {
+        $admin = User::factory()->create(['is_super_admin' => true]);
+        $maker = User::factory()->create();
+        $editUrl = route('admin.prices.edit');
+        $updateUrl = route('admin.prices.update');
+        $createUrl = route('listings.create');
+
+        $this->actingAs($maker)->put($updateUrl, ['use_default_price' => '1', 'default_price' => 750])
+            ->assertForbidden();
+        $this->get($createUrl)->assertViewHas('defaultPrice', null);
+
+        $this->actingAs($admin)->get($editUrl)->assertOk()->assertSee('Подставлять цену по умолчанию');
+        $this->from($editUrl)->put($updateUrl, ['use_default_price' => '1', 'default_price' => ''])
+            ->assertSessionHasErrors('default_price');
+        $this->put($updateUrl, ['use_default_price' => '1', 'default_price' => 750])
+            ->assertRedirect($editUrl)->assertSessionHasNoErrors();
+        $this->actingAs($maker)->get($createUrl)->assertViewHas('defaultPrice', 750)
+            ->assertSee('name="price" min="1" max="10000000" value="750"', false);
+
+        $this->actingAs($admin)->put($updateUrl, ['use_default_price' => '0', 'default_price' => 750])
+            ->assertRedirect($editUrl);
+        $this->actingAs($maker)->get($createUrl)->assertViewHas('defaultPrice', null)
+            ->assertSee('name="price" min="1" max="10000000" value=""', false);
+    }
+
     public function test_the_console_can_reset_only_an_existing_admin_password(): void
     {
         $admin = User::factory()->create();

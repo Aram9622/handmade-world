@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\SaveListingRequest;
 use App\Models\Listing;
+use App\Models\MarketplaceSetting;
 use App\Services\CatalogCategories;
 use App\Services\CategorySubscriptions;
 use App\Services\EditorialContent;
@@ -155,7 +156,13 @@ class ListingController extends Controller
 
     public function create(EditorialContent $editorial)
     {
-        return view('sell', ['listing' => null, 'categories' => $editorial->all(app()->getLocale())]);
+        $settings = MarketplaceSetting::current();
+
+        return view('sell', [
+            'listing' => null,
+            'categories' => $editorial->all(app()->getLocale()),
+            'defaultPrice' => $settings->use_default_price ? $settings->default_price : null,
+        ]);
     }
 
     public function edit(Request $request, Listing $listing, EditorialContent $editorial)

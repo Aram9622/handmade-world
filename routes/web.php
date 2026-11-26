@@ -55,6 +55,8 @@ Route::middleware('auth')->group(function () {
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'can:manage-marketplace'])->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('index');
+    Route::get('/prices', [AdminController::class, 'prices'])->name('prices.edit');
+    Route::put('/prices', [AdminController::class, 'updatePrices'])->name('prices.update');
     Route::get('/menu', [StorefrontMenuController::class, 'edit'])->name('menu.edit');
     Route::put('/menu', [StorefrontMenuController::class, 'update'])->name('menu.update');
     Route::post('/menu/categories/create', [StorefrontMenuController::class, 'createCategory'])->name('menu.categories.create');
