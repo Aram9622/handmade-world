@@ -13,13 +13,6 @@ class Listing extends Model
 {
     public const PRICE_RULES = ['integer', 'min:1', 'max:10000000'];
 
-    public const CATEGORIES = [
-        'paintings' => 'Картины',
-        'ceramics' => 'Керамика',
-        'jewelry' => 'Украшения',
-        'textile' => 'Текстиль',
-        'decor' => 'Декор',
-        'other' => 'Другое',
     public const MAX_GALLERY_PHOTOS = 6;
 
     public const MAX_CHARACTERISTICS = 10;
